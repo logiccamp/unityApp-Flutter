@@ -161,6 +161,9 @@ class _ParcelStatusUpdateState extends State<ParcelStatusUpdate> {
                                             ),
                                           ),
                                         ),
+                                        const Divider(
+                                          thickness: 2,
+                                        ),
                                         InkWell(
                                           onTap: () {
                                             Navigator.of(context).pop(context);

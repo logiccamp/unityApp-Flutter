@@ -48,6 +48,8 @@ class _AdminParcelDetailsState extends State<AdminParcelDetails> {
   bool isParcel = false;
   var utils = Utils();
   var Parcel_;
+  var role = "";
+  var post = "";
   UserParcelData rider = UserParcelData("", "", "", "");
   List<UserParcelData> users_ = [];
   @override
@@ -68,6 +70,7 @@ class _AdminParcelDetailsState extends State<AdminParcelDetails> {
     super.initState();
     getParcel();
     getUsers();
+    getAdmin();
   }
 
   void getUsers() async {
@@ -80,7 +83,14 @@ class _AdminParcelDetailsState extends State<AdminParcelDetails> {
       }
     }
     setState(() {});
-    print(users_);
+  }
+
+  Future<Null> getAdmin() async {
+    User admin = await userClass.Details().whenComplete(() {});
+    setState(() {
+      post = admin.post.toString().toLowerCase();
+      role = admin.role;
+    });
   }
 
   getParcel() async {
@@ -455,39 +465,42 @@ class _AdminParcelDetailsState extends State<AdminParcelDetails> {
                                 ),
                               ),
                               const Spacer(),
-                              Parcel_["driver_id"].toString() == ""
-                                  ? InkWell(
-                                      onTap: () {
-                                        addDriver();
-                                      },
-                                      child: const Text("Assign Rider"),
-                                    )
-                                  : Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.end,
-                                      children: [
-                                        InkWell(
-                                          onTap: () => Navigator.of(context)
-                                              .push(MaterialPageRoute(
-                                                  builder: (context) =>
-                                                      UserProfile(
-                                                          id: rider.id,
-                                                          user_type: "Staff"))),
-                                          child: Text(
-                                              "Driver : ${rider.firstname} ${rider.lastname}"),
-                                        ),
-                                        InkWell(
+                              post == "driver"
+                                  ? Container()
+                                  : Parcel_["driver_id"].toString() == ""
+                                      ? InkWell(
                                           onTap: () {
                                             addDriver();
                                           },
-                                          child: const Text(
-                                            "change",
-                                            style:
-                                                TextStyle(color: Colors.blue),
-                                          ),
+                                          child: const Text("Assign Rider"),
+                                        )
+                                      : Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.end,
+                                          children: [
+                                            InkWell(
+                                              onTap: () => Navigator.of(context)
+                                                  .push(MaterialPageRoute(
+                                                      builder: (context) =>
+                                                          UserProfile(
+                                                              id: rider.id,
+                                                              user_type:
+                                                                  "Staff"))),
+                                              child: Text(
+                                                  "Driver : ${rider.firstname} ${rider.lastname}"),
+                                            ),
+                                            InkWell(
+                                              onTap: () {
+                                                addDriver();
+                                              },
+                                              child: const Text(
+                                                "change",
+                                                style: TextStyle(
+                                                    color: Colors.blue),
+                                              ),
+                                            ),
+                                          ],
                                         ),
-                                      ],
-                                    ),
                             ],
                           ),
                           const SizedBox(

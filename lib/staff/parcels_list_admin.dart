@@ -28,7 +28,8 @@ class _ParcelListAdminState extends State<ParcelListAdmin> {
   String user_token = "";
   bool isLoading = true;
   var appAuthentication = AppAuthentication();
-
+  GlobalKey<RefreshIndicatorState> refreshIndicatorKey =
+      GlobalKey<RefreshIndicatorState>();
   @override
   void initState() {
     // TODO: implement initState
@@ -40,6 +41,10 @@ class _ParcelListAdminState extends State<ParcelListAdmin> {
   void getToken() async {
     var token = await appAuthentication.getTokenAdmin();
     user_token = token;
+  }
+
+  Future<void> refreshData() async {
+    getParcels();
   }
 
   void getParcels() async {
@@ -98,26 +103,31 @@ class _ParcelListAdminState extends State<ParcelListAdmin> {
       ),
       body: isLoading
           ? LoadingWidget(size: size)
-          : parcelsList.isEmpty
-              ? NotFound(size: 400.0, message: "No parcel found")
-              : ListView.builder(
-                  itemCount: parcelsList.length,
-                  itemBuilder: (BuildContext context, int index) {
-                    return ParcelCard(
-                      ontap: (trackingNumber) => {
-                        Navigator.of(context).push(MaterialPageRoute(
-                            builder: ((context) => AdminParcelDetails(
-                                trackingNumber: trackingNumber))))
-                      },
-                      percent:
-                          double.parse(parcelsList[index].percent.toString()) /
+          : RefreshIndicator(
+              key: refreshIndicatorKey,
+              onRefresh: refreshData,
+              child: parcelsList.isEmpty
+                  ? NotFound(size: 400.0, message: "No parcel found")
+                  : ListView.builder(
+                      itemCount: parcelsList.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        return ParcelCard(
+                          ontap: (trackingNumber) => {
+                            Navigator.of(context).push(MaterialPageRoute(
+                                builder: ((context) => AdminParcelDetails(
+                                    trackingNumber: trackingNumber))))
+                          },
+                          percent: double.parse(
+                                  parcelsList[index].percent.toString()) /
                               100,
-                      updatedAt: parcelsList[index].updated.toString(),
-                      parentWidth: parentWidth,
-                      status: parcelsList[index].status.toString().capitalize(),
-                      trackingNumber: parcelsList[index].tracking_id.toString(),
-                    );
-                  }),
+                          updatedAt: parcelsList[index].updated.toString(),
+                          parentWidth: parentWidth,
+                          status:
+                              parcelsList[index].status.toString().capitalize(),
+                          trackingNumber:
+                              parcelsList[index].tracking_id.toString(),
+                        );
+                      })),
     );
   }
 }
