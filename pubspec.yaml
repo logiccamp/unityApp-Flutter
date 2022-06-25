@@ -36,6 +36,7 @@ dependencies:
   iconsax: ^0.0.8
   http: ^0.13.4
   shared_preferences: ^2.0.13
+  flutter_svg: ^1.0.3
 
 dev_dependencies:
   flutter_test:
@@ -68,6 +69,8 @@ flutter:
     - assets/images/courier_circle.png
     - assets/images/in_transit_circle.png
     - assets/images/received_circle.png
+    - assets/icons/delivery.svg
+    - assets/icons/pickup.svg
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.
 
