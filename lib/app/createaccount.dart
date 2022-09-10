@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/gestures.dart';
@@ -6,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:unitycargo/app/appconatiner.dart';
 import 'package:unitycargo/app/login.dart';
 import 'package:unitycargo/bll/signup_logic.dart';
+import 'package:unitycargo/resources/app_authentication.dart';
 
 class CreateAccount extends StatefulWidget {
   const CreateAccount({Key? key}) : super(key: key);
@@ -15,15 +17,28 @@ class CreateAccount extends StatefulWidget {
 }
 
 class _CreateAccountState extends State<CreateAccount> {
+  bool isLoading = false;
+  var firstnameController = TextEditingController();
+  var lastnameController = TextEditingController();
+  var phoneController = TextEditingController();
+  var emailController = TextEditingController();
+  var passwordController = TextEditingController();
+  AppAuthentication appAuthentication = AppAuthentication();
+
+  @override
+  void dispose() {
+    // TODO: implement initState
+    emailController.dispose();
+    firstnameController.dispose();
+    lastnameController.dispose();
+    phoneController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
-    var firstnameController = TextEditingController();
-    var lastnameController = TextEditingController();
-    var phoneController = TextEditingController();
-    var emailController = TextEditingController();
-    var passwordController = TextEditingController();
-
     return Scaffold(
       body: ScrollConfiguration(
         behavior: MyBehavior(),
@@ -136,6 +151,32 @@ class _CreateAccountState extends State<CreateAccount> {
                                     splashColor: Colors.transparent,
                                     highlightColor: Colors.transparent,
                                     onTap: () async {
+                                      setState(() {
+                                        isLoading = true;
+                                      });
+
+                                      final isValid =
+                                          await appAuthentication.verifySignup(
+                                              firstnameController.text,
+                                              lastnameController.text,
+                                              emailController.text,
+                                              phoneController.text,
+                                              passwordController.text);
+                                      if (isValid != "valid") {
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          SnackBar(
+                                            content: Text(isValid.toString()),
+                                            backgroundColor:
+                                                Colors.red.withOpacity(0.6),
+                                          ),
+                                        );
+
+                                        setState(() {
+                                          isLoading = false;
+                                        });
+                                        return;
+                                      }
                                       HapticFeedback.lightImpact();
                                       final signupBLL = await signup(
                                         emailController.text,
@@ -168,6 +209,9 @@ class _CreateAccountState extends State<CreateAccount> {
                                                 Colors.red.withOpacity(0.6),
                                           ),
                                         );
+                                        setState(() {
+                                          isLoading = false;
+                                        });
                                       }
                                     },
                                     child: Container(
@@ -178,12 +222,14 @@ class _CreateAccountState extends State<CreateAccount> {
                                       width: size.width / 1.5,
                                       alignment: Alignment.center,
                                       decoration: BoxDecoration(
-                                        color: Colors.black.withOpacity(.1),
+                                        color: isLoading
+                                            ? Colors.grey.withOpacity(0.1)
+                                            : Colors.black.withOpacity(.1),
                                         borderRadius: BorderRadius.circular(20),
                                       ),
-                                      child: const Text(
-                                        'Sign Up',
-                                        style: TextStyle(
+                                      child: Text(
+                                        isLoading ? 'Processing...' : 'Sign Up',
+                                        style: const TextStyle(
                                           color: Colors.white,
                                           fontSize: 20,
                                           fontWeight: FontWeight.w600,

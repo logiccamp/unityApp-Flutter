@@ -1,11 +1,22 @@
+import 'dart:async';
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:unitycargo/app/login.dart';
+import 'package:unitycargo/app/main/mypacel/loading.dart';
+import 'package:unitycargo/app/main/mypacel/not_found.dart';
 import 'package:unitycargo/app/main/parcels.dart';
+import 'package:unitycargo/bll/parcels_logic.dart';
+import 'package:unitycargo/resources/app_authentication.dart';
 import 'package:unitycargo/utils/colors.dart';
+import 'package:unitycargo/utils/extensions.dart';
 import 'package:unitycargo/utils/package_list.dart';
 
+import '../../resources/parcel_data.dart';
 import 'mypacel/parcel_card.dart';
 import 'mypacel/parcel_detail.dart';
+import 'mypacel/parcel_final.dart';
 import 'mypacel/parcel_status.dart';
 import 'mypacel/title_with_avatar.dart';
 import 'mypacel/top_bar.dart';
@@ -18,14 +29,56 @@ class MyParcel extends StatefulWidget {
 }
 
 class _MyParcelState extends State<MyParcel> {
+  Parcel parcelLogic = Parcel();
+  List<ParcelResponse> parcelsList = [];
+  String user_token = "";
+  bool isLoading = true;
+  var appAuthentication = AppAuthentication();
+  var searchBoxController = TextEditingController();
+
   @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getToken();
+    getParcels();
+  }
+
+  void getToken() async {
+    var token = await appAuthentication.getToken();
+    user_token = token;
+  }
+
+  void getParcels() async {
+    var checkUser = await appAuthentication.checkUser(context);
+    List<ParcelResponse> parcelsList_ = [];
+    if (checkUser) {
+      var response = await parcelLogic.MyParcels(2);
+      if (response["message"] == "Unauthenticated.") {
+        //redirect to login page
+        Navigator.push(context,
+            MaterialPageRoute(builder: (context) => const LoginScreen()));
+      }
+
+      var parcels = response["data"];
+      for (var p in parcels) {
+        var pr = ParcelResponse.fromJson(p);
+        parcelsList_.add(pr);
+      }
+      setState(() {
+        parcelsList = parcelsList_;
+        isLoading = false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    // appAuthentication.checkUser(context);
     final Size size = MediaQuery.of(context).size;
     final parentWidth =
         size.width - (kDefaultPadding * 2 + (kDefaultPadding / 2 * 2));
-
-    void _OpenParcel(context, id) {
+    void _OpenParcel(context, id) async {
       showDialog(
           barrierColor: Colors.black.withOpacity(0.7),
           context: context,
@@ -71,14 +124,21 @@ class _MyParcelState extends State<MyParcel> {
     }
 
     return DefaultTabController(
-      length: 3,
+      length: 4,
       child: Scaffold(
+        backgroundColor: parcelsList.isEmpty ? Colors.white : Colors.grey[50],
         body: SingleChildScrollView(
           child: SizedBox(
-            height: size.height * 0.95,
             child: Column(
               children: [
-                TopBar(size: size),
+                TopBar(
+                  size: size,
+                  searchboxController: searchBoxController,
+                  onpress: () => {
+                    if (searchBoxController.text != "")
+                      _OpenParcel(context, searchBoxController.text)
+                  },
+                ),
                 Column(
                   children: <Widget>[
                     Padding(
@@ -100,26 +160,8 @@ class _MyParcelState extends State<MyParcel> {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                        builder: (context) =>
-                                            const ParcelsList()),
+                                        builder: (context) => ParcelsList()),
                                   );
-                                  // showDialog(
-                                  //     context: context,
-                                  //     builder: (context) {
-                                  //       return AlertDialog(
-                                  //         title: Text("Message"),
-                                  //         content: Text("Loading"),
-                                  //         actions: [
-                                  //           MaterialButton(
-                                  //             onPressed: () {
-                                  //               Navigator.of(context)
-                                  //                   .pop(context);
-                                  //             },
-                                  //             child: Text("close"),
-                                  //           )
-                                  //         ],
-                                  //       );
-                                  //     });
                                 },
                                 child: Text(
                                   "View all",
@@ -127,26 +169,38 @@ class _MyParcelState extends State<MyParcel> {
                                 ))
                           ],
                         )),
-                    ParcelCard(
-                      ontap: (trackingNumber) =>
-                          {_OpenParcel(context, trackingNumber)},
-                      percent:
-                          double.parse(packages[0]["percent"].toString()) / 100,
-                      updatedAt: packages[0]["updated"].toString(),
-                      parentWidth: parentWidth,
-                      status: packages[0]["status"].toString(),
-                      trackingNumber: packages[0]["tracking_id"].toString(),
-                    ),
-                    ParcelCard(
-                      ontap: (trackingNumber) =>
-                          {_OpenParcel(context, trackingNumber)},
-                      percent:
-                          double.parse(packages[1]["percent"].toString()) / 100,
-                      updatedAt: packages[1]["updated"].toString(),
-                      parentWidth: parentWidth,
-                      status: packages[1]["status"].toString(),
-                      trackingNumber: packages[1]["tracking_id"].toString(),
-                    ),
+                    isLoading
+                        ? SizedBox(
+                            height: 400, child: LoadingWidget(size: size))
+                        : parcelsList.isNotEmpty
+                            ? SizedBox(
+                                height: 400,
+                                child: ListView.builder(
+                                  itemCount: parcelsList.length,
+                                  itemBuilder: (context, int index) {
+                                    return ParcelCard(
+                                      ontap: (trackingNumber) => {
+                                        _OpenParcel(context, trackingNumber)
+                                      },
+                                      percent: double.parse(parcelsList[index]
+                                              .percent
+                                              .toString()) /
+                                          100,
+                                      updatedAt:
+                                          parcelsList[index].updated.toString(),
+                                      parentWidth: parentWidth,
+                                      status: parcelsList[index]
+                                          .status
+                                          .toString()
+                                          .capitalize(),
+                                      trackingNumber: parcelsList[index]
+                                          .tracking_id
+                                          .toString(),
+                                    );
+                                  },
+                                ),
+                              )
+                            : NotFound(size: 400.0, message: "No item found")
                   ],
                 ),
               ],

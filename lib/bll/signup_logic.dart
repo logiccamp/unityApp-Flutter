@@ -6,32 +6,36 @@ import '../utils/app_urls.dart';
 
 Future signup(String email, String password, String firstname, String lastname,
     String phone) async {
+  String path = url + "register";
   try {
-    var response = await http.post(Uri.parse(url + "signup/"),
-        body: ({
-          "email": email,
-          "password": password,
-          "firstname": firstname,
-          "lastname": lastname,
-          "phone": phone,
-          "type": "appuser",
-        }),
-        headers: {"accept": "application/json"});
+    var data = {
+      "email": email,
+      "password": password,
+      "firstname": firstname,
+      "lastname": lastname,
+      "phone_number": phone,
+      "type": "appuser",
+    };
+    var response = await http.post(Uri.parse(path),
+        body: (data), headers: {"accept": "application/json"});
     var res = json.decode(response.body);
-    if (res == true) {
-      return "success";
-    }
-    if (res == false) {
-      return "Something went wrong! Please try again";
+    print(response.body);
+    if (response.statusCode == 401) {
+      return "One or more input is invalid";
     }
 
     if (res == "email") {
-      return "Email address already exist";
+      return "Email has been taken";
     }
 
-    return "All fields are required";
+    if (res == "phone") {
+      return "Phone number already exist";
+    }
+
+    if (res["data"]["status"]) {
+      return "success";
+    }
   } catch (e) {
-    return print(e.toString());
     return e.toString();
   }
 }

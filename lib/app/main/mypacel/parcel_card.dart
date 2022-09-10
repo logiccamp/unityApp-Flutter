@@ -47,7 +47,12 @@ class ParcelCard extends StatelessWidget {
                   bottom: 10),
               child: Column(
                 children: [
-                  ParcelStatus(status: status, updatedAt : updatedAt, trackingNumber: trackingNumber, parentWidth: parentWidth, percent: percent),
+                  ParcelStatus(
+                      status: status,
+                      updatedAt: updatedAt,
+                      trackingNumber: trackingNumber,
+                      parentWidth: parentWidth,
+                      percent: percent),
                   Container(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,

@@ -1,14 +1,68 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:unitycargo/app/main/mypacel/not_found.dart';
 import 'package:unitycargo/app/main/mypacel/parcel_card.dart';
+import 'package:unitycargo/utils/extensions.dart';
 import 'package:unitycargo/utils/package_list.dart';
 
+import '../../bll/parcels_logic.dart';
+import '../../resources/app_authentication.dart';
+import '../../resources/parcel_data.dart';
 import '../../utils/colors.dart';
+import '../login.dart';
+import 'mypacel/loading.dart';
 import 'mypacel/parcel_detail.dart';
 
-class ParcelsList extends StatelessWidget {
-  const ParcelsList({Key? key}) : super(key: key);
+class ParcelsList extends StatefulWidget {
+  ParcelsList({Key? key}) : super(key: key);
+
+  @override
+  State<ParcelsList> createState() => _ParcelsListState();
+}
+
+class _ParcelsListState extends State<ParcelsList> {
+  Parcel parcelLogic = Parcel();
+
+  List<ParcelResponse> parcelsList = [];
+
+  String user_token = "";
+  bool isLoading = true;
+  var appAuthentication = AppAuthentication();
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    getToken();
+    getParcels();
+    super.initState();
+  }
+
+  void getToken() async {
+    var token = await appAuthentication.getToken();
+    user_token = token;
+  }
+
+  void getParcels() async {
+    List<ParcelResponse> parcelsList_ = [];
+
+    var response = await parcelLogic.MyParcels(0);
+    if (response["message"] == "Unauthenticated.") {
+      //redirect to login page
+      Navigator.push(context,
+          MaterialPageRoute(builder: (context) => const LoginScreen()));
+    }
+
+    var parcels = response["data"];
+    for (var p in parcels) {
+      var pr = ParcelResponse.fromJson(p);
+      parcelsList_.add(pr);
+    }
+    setState(() {
+      isLoading = false;
+      parcelsList = parcelsList_;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +72,7 @@ class ParcelsList extends StatelessWidget {
 
     var rand = Random();
 
-      void _OpenParcel(context, id) {
+    void _OpenParcel(context, id) {
       showDialog(
           barrierColor: Colors.black.withOpacity(0.7),
           context: context,
@@ -63,28 +117,36 @@ class ParcelsList extends StatelessWidget {
           });
     }
 
-
     return Scaffold(
-      appBar: AppBar(
-        elevation: 0.0,
-        title: const Text(
-          'Parcels',
+        backgroundColor: parcelsList.isEmpty ? Colors.white : Colors.grey[50],
+        appBar: AppBar(
+          elevation: 0.0,
+          title: const Text(
+            'Parcels',
+          ),
         ),
-      ),
-      body: ListView.builder(
-          itemCount: 5,
-          itemBuilder: (BuildContext context, int index) {
-            return ParcelCard(
-              ontap: (trackingNumber) =>
-                          {_OpenParcel(context, trackingNumber)},
-              parentWidth: parentWidth,
-              status: packages[index]["status"].toString(),
-              trackingNumber: packages[index]["tracking_id"].toString(),
-              updatedAt: packages[index]["updated"].toString(),
-              percent:
-                  double.parse(packages[index]["percent"].toString()) / 100,
-            );
-          }),
-    );
+        body: isLoading
+            ? SizedBox(
+                height: size.height * 90, child: LoadingWidget(size: size))
+            : parcelsList.isNotEmpty
+                ? ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: parcelsList.length,
+                    itemBuilder: (context, int index) {
+                      return ParcelCard(
+                        ontap: (trackingNumber) =>
+                            {_OpenParcel(context, trackingNumber)},
+                        percent: double.parse(
+                                parcelsList[index].percent.toString()) /
+                            100,
+                        updatedAt: parcelsList[index].updated.toString(),
+                        parentWidth: parentWidth,
+                        status:
+                            parcelsList[index].status.toString().capitalize(),
+                        trackingNumber:
+                            parcelsList[index].tracking_id.toString(),
+                      );
+                    })
+                : NotFound(size: size.height, message: "No item found"));
   }
 }

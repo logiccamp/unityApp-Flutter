@@ -1,5 +1,5 @@
-
 import 'package:flutter/material.dart';
+import 'package:iconsax/iconsax.dart';
 
 import '../../../utils/colors.dart';
 import 'title_with_avatar.dart';
@@ -18,9 +18,7 @@ class PageHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.only(
-          top: kTopSpacing,
-          left: kDefaultPadding,
-          right: kDefaultPadding),
+          top: kTopSpacing, left: kDefaultPadding, right: kDefaultPadding),
       height: size.height * 0.2,
       width: size.width,
       decoration: BoxDecoration(
@@ -42,7 +40,9 @@ class PageHeader extends StatelessWidget {
           TitleWithAvartar(
             text: title,
             textSize: kTitleSize,
-            image: "assets/images/avatar_small.png",
+            hasIcon: true,
+            icon: Iconsax.user,
+            styledIcon: true,
           ),
         ],
       ),

@@ -5,6 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:unitycargo/app/appconatiner.dart';
 import 'package:unitycargo/app/createaccount.dart';
+import 'package:unitycargo/app/reset_password.dart';
+import 'package:unitycargo/resources/app_authentication.dart';
+import 'package:unitycargo/staff/dashboard_admin.dart';
+import 'package:unitycargo/staff/login.dart';
+import 'package:unitycargo/utils/colors.dart';
 import '../bll/login_logic.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -15,12 +20,23 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  bool isLoading = false;
+  AppAuthentication appAuthentication = AppAuthentication();
+  var emailController = TextEditingController();
+  var passwordController = TextEditingController();
+
+  @override
+  void dispose() {
+    isLoading = false;
+    // TODO: implement initState
+    super.dispose();
+    emailController.dispose();
+    passwordController.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
-
-    var emailController = TextEditingController();
-    var passwordController = TextEditingController();
 
     return Scaffold(
       body: ScrollConfiguration(
@@ -97,10 +113,8 @@ class _LoginScreenState extends State<LoginScreen> {
                                           recognizer: TapGestureRecognizer()
                                             ..onTap = () {
                                               HapticFeedback.lightImpact();
-                                              // Fluttertoast.showToast(
-                                              //   msg:
-                                              //   'Forgotten password! button pressed',
-                                              // );
+                                              // appAuthentication.navigatePage(
+                                              //     context, const ResetPassword());
                                             },
                                         ),
                                       ),
@@ -124,41 +138,81 @@ class _LoginScreenState extends State<LoginScreen> {
                                       ),
                                     ],
                                   ),
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceAround,
+                                    children: [
+                                      InkWell(
+                                        onTap: () {
+                                          Navigator.of(context).push(
+                                            MaterialPageRoute(
+                                                builder: (context) =>
+                                                    StaffLogin()),
+                                          );
+                                        },
+                                        child: const Text(
+                                          "Staff Portal",
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.w900,
+                                            fontSize: 16,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                   SizedBox(height: size.width * .3),
                                   InkWell(
                                     splashColor: Colors.transparent,
                                     highlightColor: Colors.transparent,
                                     onTap: () async {
-                                      HapticFeedback.lightImpact();
+                                      setState(() {
+                                        isLoading = true;
+                                      });
 
+                                      final isValid =
+                                          await appAuthentication.verifyLogin(
+                                              emailController.text,
+                                              passwordController.text);
+
+                                      if (isValid != "valid") {
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          SnackBar(
+                                            content: Text(isValid),
+                                            backgroundColor:
+                                                Colors.red.withOpacity(0.6),
+                                          ),
+                                        );
+                                        setState(() {
+                                          isLoading = false;
+                                        });
+                                        return;
+                                      }
                                       final loginBLL = await login(
                                           emailController.text,
                                           passwordController.text);
 
-                                      if (loginBLL == "success") {
-                                        SharedPreferences pref =
-                                            await SharedPreferences
-                                                .getInstance();
-                                        pref.setString(
-                                            "userEmail", emailController.text);
+                                      if (loginBLL.success == true) {
+                                        await appAuthentication
+                                            .setToken(loginBLL.token);
                                         Navigator.push(
                                           context,
                                           MaterialPageRoute(
                                               builder: (context) =>
-                                                  const AppContainer()),
+                                                  AppContainer()),
                                         );
                                       } else {
                                         ScaffoldMessenger.of(context)
                                             .showSnackBar(
                                           SnackBar(
-                                            content: Text(loginBLL == "failed"
-                                                ? "Invalid Login credentials"
-                                                : loginBLL),
+                                            content: Text(loginBLL.message),
                                             backgroundColor:
                                                 Colors.red.withOpacity(0.6),
                                           ),
                                         );
                                       }
+                                      setState(() => isLoading = false);
                                       // Navigator.push(
                                       //   context,
                                       //   MaterialPageRoute(builder: (context) => const AppContainer()),
@@ -172,12 +226,14 @@ class _LoginScreenState extends State<LoginScreen> {
                                       width: size.width / 1.25,
                                       alignment: Alignment.center,
                                       decoration: BoxDecoration(
-                                        color: Colors.black.withOpacity(.1),
+                                        color: isLoading
+                                            ? Colors.grey.withOpacity(.1)
+                                            : Colors.black.withOpacity(.1),
                                         borderRadius: BorderRadius.circular(20),
                                       ),
                                       child: Text(
-                                        'Sign-In',
-                                        style: TextStyle(
+                                        isLoading ? 'Processing...' : 'Sign-In',
+                                        style: const TextStyle(
                                           color: Colors.white,
                                           fontSize: 20,
                                           fontWeight: FontWeight.w600,

@@ -8,8 +8,10 @@ import 'package:iconsax/iconsax.dart';
 import 'package:unitycargo/app/main/mypacel/page_header.dart';
 import 'package:unitycargo/app/main/mypacel/title_with_avatar.dart';
 import 'package:unitycargo/app/main/sendparcel_recepient.dart';
+import 'package:unitycargo/resources/first_step.dart';
 import 'package:unitycargo/utils/colors.dart';
-import 'package:unitycargo/bll/select_time.dart';
+
+import '../../resources/app_authentication.dart';
 
 class SendParcel extends StatefulWidget {
   SendParcel({Key? key}) : super(key: key);
@@ -18,7 +20,21 @@ class SendParcel extends StatefulWidget {
 }
 
 class _SendParcelState extends State<SendParcel> {
+  TextEditingController firstnameController = TextEditingController();
+  TextEditingController lastnameController = TextEditingController();
+  TextEditingController telephoneController = TextEditingController();
+  TextEditingController emailController = TextEditingController();
+  TextEditingController addressController = TextEditingController();
+  TextEditingController postalController = TextEditingController();
+  TextEditingController _dateController = TextEditingController();
+  TextEditingController _timeController = TextEditingController();
+  TextEditingController noofboxesController = TextEditingController();
+  String _commodityType = "Select Commodity Type";
   String _itemType = "Select Package Type";
+  TimeOfDay selectedTime = const TimeOfDay(hour: 12, minute: 00);
+  DateTime selectedDate = DateTime.now();
+  var appAuthentication = AppAuthentication();
+  bool isLoading = false;
   List<String> itemsTypes = [
     "Select Package Type",
     "Percel",
@@ -27,7 +43,6 @@ class _SendParcelState extends State<SendParcel> {
     "Pallet"
   ];
 
-  String _commodityType = "Select Commodity Type";
   List<String> commodityTypes = [
     "Select Commodity Type",
     "General Cargo",
@@ -36,8 +51,7 @@ class _SendParcelState extends State<SendParcel> {
     "AVI",
     "Personal Effects"
   ];
-  TimeOfDay selectedTime = const TimeOfDay(hour: 12, minute: 00);
-  DateTime selectedDate = DateTime.now();
+
   Future _selectTime(BuildContext context) async {
     // TimeOfDay selectedTime = const TimeOfDay(hour: 00, minute: 00);
     final TimeOfDay? picked = await showTimePicker(
@@ -53,7 +67,7 @@ class _SendParcelState extends State<SendParcel> {
       setState(() {
         _timeController.text = _time;
       });
-      
+
       //   _timeController.text = formatDate(
       //       DateTime(2019, 08, 1, selectedTime.hour, selectedTime.minute),
       //       [hh, ':', nn, " ", am]).toString();
@@ -71,18 +85,61 @@ class _SendParcelState extends State<SendParcel> {
     if (picked != null) {
       setState(() {
         selectedDate = picked;
-        _dateController.text = selectedDate.toString();
+        _dateController.text = selectedDate.year.toString() +
+            "-" +
+            selectedDate.month.toString() +
+            "-" +
+            selectedDate.day.toString();
         // _dateController.text = DateFormat.yMd().format(selectedDate);
       });
     }
   }
 
-  TextEditingController _dateController = TextEditingController();
-  TextEditingController _timeController = TextEditingController();
+  Future<void> nextPage() async {
+    setState(() {
+      isLoading = true;
+    });
+
+    FirstStep firstStep = FirstStep(
+        firstnameController.text,
+        lastnameController.text,
+        telephoneController.text,
+        emailController.text,
+        addressController.text,
+        postalController.text,
+        _dateController.text,
+        _timeController.text,
+        noofboxesController.text,
+        _commodityType,
+        _itemType);
+
+    String isValid = await appAuthentication.validateFirstStep(firstStep);
+
+    if (isValid != "valid") {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(isValid),
+        backgroundColor: Colors.red,
+      ));
+      return;
+    }
+    setState(() {
+      isLoading = false;
+    });
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => SendParcelRecepient(firstStep: firstStep),
+      ),
+    );
+  }
 
   @override
   void initState() {
-    _dateController.text = DateTime.now().toString();
+    _dateController.text = DateTime.now().year.toString() +
+        "-" +
+        DateTime.now().month.toString() +
+        "-" +
+        DateTime.now().day.toString();
 
     _timeController.text = TimeOfDay.now().hour.toString() +
         ':' +
@@ -119,31 +176,28 @@ class _SendParcelState extends State<SendParcel> {
                       const SizedBox(
                         height: kDefaultPadding,
                       ),
-                      component(Iconsax.user, "Firstname", false, false, false),
-                      component(Iconsax.user, "Lastname", false, false, false),
-                      component(Iconsax.user, "Telephone", false, false, false),
-                      component(
-                          Iconsax.user, "Email Address", false, true, false),
-                      component(
-                          Iconsax.user, "Pick Up Address", false, false, true),
-                      component(
-                          Iconsax.user, "Postal Code", false, false, false),
-                      component(
-                          Iconsax.user, "Postal Code", false, false, false),
+                      component(firstnameController, Iconsax.user, "Firstname",
+                          false, false, false),
+                      component(lastnameController, Iconsax.user, "Lastname",
+                          false, false, false),
+                      component(telephoneController, Iconsax.user, "Telephone",
+                          false, false, false),
+                      component(emailController, Iconsax.user, "Email Address",
+                          false, true, false),
+                      component(addressController, Iconsax.user,
+                          "Pick Up Address", false, false, true),
+                      component(postalController, Iconsax.user, "Postal Code",
+                          false, false, false),
                       PackageType(size),
                       CommodityType(size),
                       DatePicker(size, context),
                       TimePicker(size, context),
-                      component(
-                          Iconsax.user, "No. of Boxes", false, false, false),
+                      component(noofboxesController, Iconsax.user,
+                          "No. of Boxes", false, false, false),
                       const Divider(),
                       InkWell(
                         onTap: () {
-                          // for now
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => SendParcelRecepient()));
+                          isLoading ? null : nextPage();
                         },
                         child: Container(
                           width: size.width * 0.8,
@@ -162,16 +216,16 @@ class _SendParcelState extends State<SendParcel> {
                               ]),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
-                            children: const [
-                              Icon(
+                            children: [
+                              const Icon(
                                 Iconsax.save_2,
                                 color: Colors.white,
                               ),
                               Padding(
                                 padding: EdgeInsets.only(left: 8.0),
                                 child: Text(
-                                  'Proceed',
-                                  style: TextStyle(
+                                  isLoading ? "Processing" : 'Proceed',
+                                  style: const TextStyle(
                                       color: Colors.white, fontSize: 20),
                                 ),
                               ),
@@ -192,10 +246,17 @@ class _SendParcelState extends State<SendParcel> {
 
   Container TimePicker(Size size, BuildContext context) {
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: kDefaultPadding / 2 + 5),
+      margin: const EdgeInsets.only(
+          top: kDefaultPadding * 0.3, bottom: kDefaultPadding * 0.3),
       // width: size.width / 1.25,
       alignment: Alignment.center,
-      padding: EdgeInsets.only(right: size.width / 30),
+      padding: EdgeInsets.all(kDefaultPadding / 2),
+      decoration: BoxDecoration(boxShadow: [
+        BoxShadow(
+            color: blueColor.withOpacity(0.3),
+            offset: const Offset(0, 5),
+            blurRadius: 4)
+      ], color: Colors.white, borderRadius: BorderRadius.circular(10)),
       child: Column(
         children: [
           TitleWithAvartar(
@@ -243,10 +304,17 @@ class _SendParcelState extends State<SendParcel> {
 
   Container DatePicker(Size size, BuildContext context) {
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: kDefaultPadding / 2 + 5),
+      margin: const EdgeInsets.only(
+          top: kDefaultPadding * 0.3, bottom: kDefaultPadding * 0.3),
       // width: size.width / 1.25,
       alignment: Alignment.center,
-      padding: EdgeInsets.only(right: size.width / 30),
+      padding: EdgeInsets.all(kDefaultPadding / 2),
+      decoration: BoxDecoration(boxShadow: [
+        BoxShadow(
+            color: blueColor.withOpacity(0.3),
+            offset: const Offset(0, 5),
+            blurRadius: 4)
+      ], color: Colors.white, borderRadius: BorderRadius.circular(10)),
       child: Column(
         children: [
           TitleWithAvartar(
@@ -294,10 +362,17 @@ class _SendParcelState extends State<SendParcel> {
 
   Container PackageType(Size size) {
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: kDefaultPadding / 2 + 5),
+      margin: const EdgeInsets.only(
+          top: kDefaultPadding * 0.3, bottom: kDefaultPadding * 0.3),
       // width: size.width / 1.25,
       alignment: Alignment.center,
-      padding: EdgeInsets.only(right: size.width / 30),
+      padding: EdgeInsets.all(kDefaultPadding / 2),
+      decoration: BoxDecoration(boxShadow: [
+        BoxShadow(
+            color: blueColor.withOpacity(0.3),
+            offset: const Offset(0, 5),
+            blurRadius: 4)
+      ], color: Colors.white, borderRadius: BorderRadius.circular(10)),
       child: Column(
         children: [
           TitleWithAvartar(
@@ -335,10 +410,17 @@ class _SendParcelState extends State<SendParcel> {
 
   Container CommodityType(Size size) {
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: kDefaultPadding / 2 + 5),
+      margin: const EdgeInsets.only(
+          top: kDefaultPadding * 0.3, bottom: kDefaultPadding * 0.3),
       // width: size.width / 1.25,
       alignment: Alignment.center,
-      padding: EdgeInsets.only(right: size.width / 30),
+      padding: EdgeInsets.all(kDefaultPadding / 2),
+      decoration: BoxDecoration(boxShadow: [
+        BoxShadow(
+            color: blueColor.withOpacity(0.3),
+            offset: const Offset(0, 5),
+            blurRadius: 4)
+      ], color: Colors.white, borderRadius: BorderRadius.circular(10)),
       child: Column(
         children: [
           TitleWithAvartar(
@@ -374,16 +456,21 @@ class _SendParcelState extends State<SendParcel> {
     );
   }
 
-  Widget component(IconData icon, String hintText, bool isPassword,
-      bool isEmail, bool isAddress) {
+  Widget component(TextEditingController controller, IconData icon,
+      String hintText, bool isPassword, bool isEmail, bool isAddress) {
     Size size = MediaQuery.of(context).size;
     return Container(
-      margin: EdgeInsets.only(
-          top: kDefaultPadding / 2 + 5,
-          bottom: isAddress ? 0 : kDefaultPadding / 2 + 5),
+      margin: const EdgeInsets.only(
+          top: kDefaultPadding * 0.3, bottom: kDefaultPadding * 0.3),
       // width: size.width / 1.25,
       alignment: Alignment.center,
-      padding: EdgeInsets.only(right: size.width / 30),
+      padding: EdgeInsets.all(kDefaultPadding / 2),
+      decoration: BoxDecoration(boxShadow: [
+        BoxShadow(
+            color: blueColor.withOpacity(0.3),
+            offset: const Offset(0, 5),
+            blurRadius: 4)
+      ], color: Colors.white, borderRadius: BorderRadius.circular(10)),
       child: Column(
         children: [
           TitleWithAvartar(
@@ -397,8 +484,11 @@ class _SendParcelState extends State<SendParcel> {
               color: Colors.white,
               borderRadius: BorderRadius.circular(10),
             ),
-            height: isAddress ? 70 : 45,
+            height: isAddress ? 70 : 40,
             child: TextField(
+              controller: controller,
+              minLines: isAddress ? 3 : 1,
+              maxLines: isAddress ? 5 : 1,
               style: TextStyle(
                 color: Colors.black.withOpacity(.9),
               ),

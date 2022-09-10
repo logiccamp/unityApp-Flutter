@@ -5,16 +5,24 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:unitycargo/app/appconatiner.dart';
 import 'package:unitycargo/app/main/mypacel/page_header.dart';
+import 'package:unitycargo/app/main/mypacel/parcel_final.dart';
+import 'package:unitycargo/app/main/mypacel/pickup_summary.dart';
 import 'package:unitycargo/app/main/mypacel/title_with_avatar.dart';
+import 'package:unitycargo/resources/first_step.dart';
+import 'package:unitycargo/resources/second_step.dart';
 import 'package:unitycargo/utils/colors.dart';
-import 'package:unitycargo/bll/select_time.dart';
 
+import '../../resources/app_authentication.dart';
+import '../../utils/states_list.dart';
+import '../../bll/parcels_logic.dart';
 import 'mypacel/app_button.dart';
 import 'mypacel/parcel_detail.dart';
 
 class SendParcelRecepient extends StatefulWidget {
-  SendParcelRecepient({Key? key}) : super(key: key);
+  SendParcelRecepient({Key? key, required this.firstStep}) : super(key: key);
+  FirstStep firstStep;
   @override
   _SendParcelRecepientState createState() => _SendParcelRecepientState();
 }
@@ -22,51 +30,22 @@ class SendParcelRecepient extends StatefulWidget {
 class _SendParcelRecepientState extends State<SendParcelRecepient> {
   String _state = "Select State";
   int _selectedDeliveryMode = 0;
-  List<String> states = [
-    "Select State",
-    "Abia",
-    "Adamawa",
-    "Akwa Ibom",
-    "Anambra",
-    "Bauchi",
-    "Bayelsa",
-    "Benue",
-    "Borno",
-    "Cross River",
-    "Delta",
-    "Ebonyi",
-    "Edo",
-    "Ekiti",
-    "Enugu",
-    "FCT - Abuja",
-    "Gombe",
-    "Imo",
-    "Jigawa",
-    "Kaduna",
-    "Kano",
-    "Katsina",
-    "Kebbi",
-    "Kogi",
-    "Kwara",
-    "Lagos",
-    "Nasarawa",
-    "Niger",
-    "Ogun",
-    "Ondo",
-    "Osun",
-    "Oyo",
-    "Plateau",
-    "Rivers",
-    "Sokoto",
-    "Taraba",
-    "Yobe",
-    "Zamfara"
-  ];
-
+  var appAuthentication = AppAuthentication();
+  Parcel parcelLogic = Parcel();
+  bool isLoading = false;
+  TextEditingController r_firstname = TextEditingController();
+  TextEditingController r_lastname = TextEditingController();
+  TextEditingController r_address = TextEditingController();
+  TextEditingController r_phone1 = TextEditingController();
+  TextEditingController r_phone2 = TextEditingController();
+  TextEditingController r_city = TextEditingController();
+  SecondStep secondStep = SecondStep("", "", "", "", "", "", "", "");
   @override
   void initState() {
     String _staste = "Select State";
     _selectedDeliveryMode = 0;
+    validateFirstStep();
+    isLoading = false;
     super.initState();
   }
 
@@ -75,21 +54,124 @@ class _SendParcelRecepientState extends State<SendParcelRecepient> {
     {"value": "Delivery to an address", "icon": "assets/icons/delivery.svg"}
   ];
 
+  Future validateFirstStep() async {
+    String isValid =
+        await appAuthentication.validateFirstStep(widget.firstStep);
+
+    if (isValid != "valid") {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text("Please enter sender's information"),
+        backgroundColor: Colors.red,
+      ));
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => AppContainer(selectedIndex: 1),
+        ),
+      );
+      return;
+    }
+  }
+
+  Future submitRequest() async {
+    // firstname, lastname, address, phone1, phone2, city, state, deliveryMode
+    setState(() {
+      secondStep = SecondStep(
+          r_firstname.text,
+          r_lastname.text,
+          r_address.text,
+          r_phone1.text,
+          r_phone2.text,
+          r_city.text,
+          _state,
+          delivery_mode[_selectedDeliveryMode]["value"].toString());
+    });
+
+    String isValid =
+        await appAuthentication.validateFirstStep(widget.firstStep);
+    setState(() {
+      isLoading = false;
+    });
+    if (isValid != "valid") {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text("Please enter sender's information"),
+        backgroundColor: Colors.red,
+      ));
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => AppContainer(selectedIndex: 1),
+        ),
+      );
+      return;
+    }
+    String isValid2 = await appAuthentication.validateSecondStep(secondStep);
+
+    if (isValid2 != "valid") {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(isValid2),
+        backgroundColor: Colors.red,
+      ));
+      return;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
-    void _OpenParcel(context, id) {
+    void _onFinal(context, status) {
+      Navigator.of(context).pop();
+      showModalBottomSheet(
+          isDismissible: false,
+          enableDrag: false,
+          backgroundColor: Colors.white.withOpacity(0),
+          context: context,
+          builder: (BuildContext context) {
+            return SingleChildScrollView(
+              child: SizedBox(
+                child: Column(
+                  children: [
+                    const SizedBox(
+                      height: 50,
+                    ),
+                    Container(
+                      decoration: BoxDecoration(
+                        borderRadius: const BorderRadius.only(
+                            topLeft: Radius.circular(kDefaultPadding),
+                            topRight: Radius.circular(kDefaultPadding)),
+                        color: Colors.white,
+                        boxShadow: [
+                          BoxShadow(
+                              offset: const Offset(10, 0),
+                              color: blueColor.withOpacity(0.5),
+                              blurRadius: 10),
+                        ],
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(kDefaultPadding),
+                        child: ParcelFinal(size: size),
+                      ),
+                    )
+                  ],
+                ),
+              ),
+            );
+          });
+    }
+
+    void _OpenParcel(context, SecondStep secondStep, FirstStep firstStep) {
       showDialog(
           barrierColor: Colors.black.withOpacity(0.7),
           context: context,
           builder: (BuildContext context) {
-            return SizedBox(
-              height: 400,
-              child: SingleChildScrollView(
+            return SingleChildScrollView(
+              child: SizedBox(
                 child: Column(
                   children: [
                     const SizedBox(
-                      height: 100,
+                      height: 50,
                     ),
                     Container(
                       decoration: BoxDecoration(
@@ -107,12 +189,36 @@ class _SendParcelRecepientState extends State<SendParcelRecepient> {
                         padding: const EdgeInsets.only(
                             left: kDefaultPadding,
                             right: kDefaultPadding,
-                            top: kDefaultPadding * 2,
+                            top: kDefaultPadding,
                             bottom: kDefaultPadding),
-                        child: Details(
+                        child: Summary(
+                          isLoading: isLoading,
+                          firstStep: firstStep,
+                          secondStep: secondStep,
                           size: size,
-                          parentWidth: 200,
-                          trackingNumber: id,
+                          afterCommand: () async {
+                            setState(() {
+                              isLoading = true;
+                            });
+                            var addParcel = await parcelLogic.addParcel(
+                                firstStep, secondStep);
+                            if (addParcel.success == true) {
+                              setState(() {
+                                isLoading = false;
+                              });
+                              _onFinal(context, "true");
+                            } else {
+                              setState(() {
+                                isLoading = false;
+                              });
+                              Navigator.pop(context);
+                              ScaffoldMessenger.of(context)
+                                  .showSnackBar(SnackBar(
+                                content: Text(addParcel.message),
+                                backgroundColor: Colors.red,
+                              ));
+                            }
+                          },
                         ),
                       ),
                     )
@@ -149,28 +255,55 @@ class _SendParcelRecepientState extends State<SendParcelRecepient> {
                       const SizedBox(
                         height: kDefaultPadding,
                       ),
-                      component(Iconsax.user, "Firstname", false, false, false),
-                      component(Iconsax.user, "Lastname", false, false, false),
-                      component(Iconsax.user, "Receiver's Address", false,
-                          false, true),
+                      component(r_firstname, Iconsax.user, "Firstname", false,
+                          false, false),
+                      component(r_lastname, Iconsax.user, "Lastname", false,
+                          false, false),
+                      component(r_address, Iconsax.user, "Receiver's Address",
+                          false, false, true),
+                      component(r_phone1, Iconsax.user, "Phone number 1", false,
+                          false, false),
+                      component(r_phone2, Iconsax.user, "Phone number 2", false,
+                          false, false),
                       component(
-                          Iconsax.user, "Phone number 1", false, false, false),
-                      component(
-                          Iconsax.user, "Phone number 2", false, false, false),
-                      component(Iconsax.user, "City", false, false, false),
+                          r_city, Iconsax.user, "City", false, false, false),
                       StateSelect(size),
-                      const SizedBox(height: 20),
-                      TitleWithAvartar(
-                        text: "Delivery Mode",
-                        textSize: 16,
-                        color: Colors.black54,
-                      ),
-                      DeliveryMode(),
+                      Container(
+                          height: 280.0,
+                          margin:
+                              const EdgeInsets.only(top: kDefaultPadding / 2),
+                          alignment: Alignment.center,
+                          padding: EdgeInsets.all(kDefaultPadding / 2),
+                          decoration: BoxDecoration(
+                              boxShadow: [
+                                BoxShadow(
+                                    color: blueColor.withOpacity(0.3),
+                                    offset: const Offset(0, 5),
+                                    blurRadius: 4)
+                              ],
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(10)),
+                          child: Column(children: [
+                            const SizedBox(height: 10),
+                            TitleWithAvartar(
+                              text: "Delivery Mode",
+                              textSize: 16,
+                              color: Colors.black54,
+                            ),
+                            const SizedBox(height: 20),
+                            DeliveryMode(),
+                          ])),
                       const SizedBox(height: 20),
                       AppButton(
-                          size: size,
-                          onpress: () =>
-                              _OpenParcel(context, "ahsdflhaksfdlk")),
+                        size: size,
+                        onpress: () {
+                          if (!isLoading) {
+                            submitRequest();
+                            _OpenParcel(context, secondStep, widget.firstStep);
+                          }
+                        },
+                        text: isLoading ? "processing..." : "Update",
+                      ),
                       const SizedBox(height: 20),
                     ]),
                   ),
@@ -240,16 +373,21 @@ class _SendParcelRecepientState extends State<SendParcelRecepient> {
     );
   }
 
-  Widget component(IconData icon, String hintText, bool isPassword,
-      bool isEmail, bool isAddress) {
+  Widget component(TextEditingController controller, IconData icon,
+      String hintText, bool isPassword, bool isEmail, bool isAddress) {
     Size size = MediaQuery.of(context).size;
     return Container(
-      margin: EdgeInsets.only(
-          top: kDefaultPadding / 2 + 5,
-          bottom: isAddress ? 0 : kDefaultPadding / 2 + 5),
+      margin: const EdgeInsets.only(
+          top: kDefaultPadding * 0.3, bottom: kDefaultPadding * 0.3),
       // width: size.width / 1.25,
       alignment: Alignment.center,
-      padding: EdgeInsets.only(right: size.width / 30),
+      padding: EdgeInsets.all(kDefaultPadding / 2),
+      decoration: BoxDecoration(boxShadow: [
+        BoxShadow(
+            color: blueColor.withOpacity(0.3),
+            offset: const Offset(0, 5),
+            blurRadius: 4)
+      ], color: Colors.white, borderRadius: BorderRadius.circular(10)),
       child: Column(
         children: [
           TitleWithAvartar(
@@ -263,8 +401,11 @@ class _SendParcelRecepientState extends State<SendParcelRecepient> {
               color: Colors.white,
               borderRadius: BorderRadius.circular(10),
             ),
-            height: isAddress ? 70 : 45,
+            height: isAddress ? 70 : 40,
             child: TextField(
+              controller: controller,
+              minLines: isAddress ? 3 : 1,
+              maxLines: isAddress ? 5 : 1,
               style: TextStyle(
                 color: Colors.black.withOpacity(.9),
               ),
@@ -292,10 +433,17 @@ class _SendParcelRecepientState extends State<SendParcelRecepient> {
 
   Container StateSelect(Size size) {
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: kDefaultPadding / 2 + 5),
+      margin: const EdgeInsets.only(
+          top: kDefaultPadding * 0.3, bottom: kDefaultPadding * 0.3),
       // width: size.width / 1.25,
       alignment: Alignment.center,
-      padding: EdgeInsets.only(right: size.width / 30),
+      padding: EdgeInsets.all(kDefaultPadding / 2),
+      decoration: BoxDecoration(boxShadow: [
+        BoxShadow(
+            color: blueColor.withOpacity(0.3),
+            offset: const Offset(0, 5),
+            blurRadius: 4)
+      ], color: Colors.white, borderRadius: BorderRadius.circular(10)),
       child: Column(
         children: [
           TitleWithAvartar(
