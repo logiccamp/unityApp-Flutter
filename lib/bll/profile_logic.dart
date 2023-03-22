@@ -10,7 +10,7 @@ class ProfileLogic {
     var appAuthentication = AppAuthentication();
     String path = url + "user-details";
     String token = await appAuthentication.getToken();
-    var response = await http.post(Uri.parse(path), headers: {
+    var response = await http.get(Uri.parse(path), headers: {
       "accept": "application/json",
       "Authorization": "Bearer " + token,
       "token": token,

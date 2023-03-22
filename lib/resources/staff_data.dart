@@ -1,29 +1,22 @@
 import 'package:unitycargo/resources/parcel_data.dart';
 
-class User {
+class Staff {
   String firstname = "";
   String lastname = "";
   String phone = "";
   String address = "";
-  String role = "";
   String email = "";
+  String post = "";
+  String password = "";
   String id = "";
-  List<ParcelResponse> Parcels = [];
-  User(this.firstname, this.lastname, this.phone, this.address);
+  Staff(this.firstname, this.lastname, this.phone, this.address, this.email,
+      this.password, this.post);
 
-  User.fromJson(Map<String, dynamic> json) {
-    try {
-      var parcels = json["parcels"];
-      for (var p in parcels) {
-        Parcels.add(ParcelResponse.fromJson(p));
-      }
-    } catch (e) {
-      print(e);
-    }
+  Staff.fromJson(Map<String, dynamic> json) {
     firstname = json["firstname"];
     lastname = json["lastname"].toString();
     phone = json["phone_number"];
-    role = json["role"];
+    post = json["post"];
     email = json["email"];
     id = json["id"].toString();
     address =

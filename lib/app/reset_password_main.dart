@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:unitycargo/app/appconatiner.dart';
 import 'package:unitycargo/app/createaccount.dart';
 import 'package:unitycargo/app/login.dart';
+import 'package:unitycargo/app/reset_password.dart';
 import 'package:unitycargo/bll/password_logic.dart';
 import 'package:unitycargo/resources/app_authentication.dart';
 import 'package:unitycargo/utils/colors.dart';
@@ -23,16 +24,36 @@ class ResetPasswordMain extends StatefulWidget {
 class _ResetPasswordMainState extends State<ResetPasswordMain> {
   bool isLoading = false;
   AppAuthentication appAuthentication = AppAuthentication();
-  var emailController = TextEditingController();
+  var userEmail = "";
+  var tokenController = TextEditingController();
   var passwordController = TextEditingController();
+  var password_confirmationController = TextEditingController();
 
   @override
   void dispose() {
-    isLoading = false;
     // TODO: implement initState
     super.dispose();
-    emailController.dispose();
-    passwordController.dispose();
+    tokenController.dispose();
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    checkUser();
+  }
+
+  void checkUser() async {
+    var userEmail_ =
+        await appAuthentication.getTokenVariable("password_reset_email");
+
+    if (userEmail_ == "null") {
+      appAuthentication.navigatePage(context, const ResetPassword());
+      return;
+    }
+    setState(() {
+      userEmail = userEmail_;
+    });
   }
 
   @override
@@ -77,22 +98,40 @@ class _ResetPasswordMainState extends State<ResetPasswordMain> {
                                     padding: EdgeInsets.only(
                                       top: size.width * .15,
                                       bottom: size.width * .1,
+                                      left: 30,
+                                      right: 30,
                                     ),
                                     child: Text(
-                                      'FORGOT PASSWORD',
+                                      'Please enter the code sent to your email, ' +
+                                          userEmail +
+                                          ".",
                                       style: TextStyle(
-                                        fontSize: 25,
+                                        fontSize: 18,
                                         fontWeight: FontWeight.w600,
                                         color: Colors.white.withOpacity(.8),
                                       ),
                                     ),
                                   ),
                                   component(
-                                    Icons.email_outlined,
-                                    'Email...',
+                                    Icons.lock,
+                                    'Enter token...',
                                     false,
+                                    false,
+                                    tokenController,
+                                  ),
+                                  component(
+                                    Icons.lock,
+                                    'Enter New Password...',
                                     true,
-                                    emailController,
+                                    false,
+                                    passwordController,
+                                  ),
+                                  component(
+                                    Icons.lock,
+                                    'Confirm Password...',
+                                    true,
+                                    false,
+                                    password_confirmationController,
                                   ),
                                   Row(
                                     mainAxisAlignment:
@@ -100,7 +139,7 @@ class _ResetPasswordMainState extends State<ResetPasswordMain> {
                                     children: [
                                       RichText(
                                         text: TextSpan(
-                                          text: 'Login to you account',
+                                          text: 'Back to Login',
                                           style: const TextStyle(
                                             color: Colors.white,
                                           ),
@@ -119,7 +158,7 @@ class _ResetPasswordMainState extends State<ResetPasswordMain> {
                                       ),
                                     ],
                                   ),
-                                  SizedBox(height: size.width * .3),
+                                  SizedBox(height: size.width * .1),
                                   InkWell(
                                     splashColor: Colors.transparent,
                                     highlightColor: Colors.transparent,
@@ -129,11 +168,30 @@ class _ResetPasswordMainState extends State<ResetPasswordMain> {
                                       });
 
                                       final isValid = await appAuthentication
-                                          .verifyForgotPassword(
-                                        emailController.text,
+                                          .verifyForgotPasswordToken(
+                                        tokenController.text,
                                       );
 
                                       if (isValid != "valid") {
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          SnackBar(
+                                            content: Text(isValid),
+                                            backgroundColor:
+                                                Colors.red.withOpacity(0.6),
+                                          ),
+                                        );
+
+                                        return;
+                                      }
+
+                                      final isValid2 = await appAuthentication
+                                          .validPasswordChange2(
+                                              passwordController.text,
+                                              password_confirmationController
+                                                  .text);
+
+                                      if (isValid2 != "valid") {
                                         ScaffoldMessenger.of(context)
                                             .showSnackBar(
                                           SnackBar(
@@ -150,9 +208,22 @@ class _ResetPasswordMainState extends State<ResetPasswordMain> {
 
                                       ResponseData forgotPassword =
                                           await passwordLogic.resetPassword(
-                                              emailController.text, "", "", "");
+                                              userEmail,
+                                              tokenController.text,
+                                              passwordController.text,
+                                              password_confirmationController
+                                                  .text);
 
                                       if (forgotPassword.success == true) {
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          SnackBar(
+                                            content: Text(
+                                                forgotPassword.message +
+                                                    ", please login."),
+                                            backgroundColor: Colors.green,
+                                          ),
+                                        );
                                         await appAuthentication
                                             .removeTokenVariable(
                                                 "password_reset_email");
@@ -185,12 +256,36 @@ class _ResetPasswordMainState extends State<ResetPasswordMain> {
                                         borderRadius: BorderRadius.circular(20),
                                       ),
                                       child: Text(
-                                        isLoading ? 'Processing...' : 'Sign-In',
+                                        isLoading ? 'Processing...' : 'Submit',
                                         style: const TextStyle(
                                           color: Colors.white,
                                           fontSize: 20,
                                           fontWeight: FontWeight.w600,
                                         ),
+                                      ),
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: kDefaultPadding),
+                                    child: InkWell(
+                                      onTap: () {
+                                        PasswordLogic()
+                                            .forgotPassword(userEmail);
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          const SnackBar(
+                                            content: Text(
+                                              "Token Sent, please check your email",
+                                            ),
+                                            backgroundColor: Colors.green,
+                                          ),
+                                        );
+                                      },
+                                      child: Text(
+                                        "Resend Token",
+                                        style: TextStyle(
+                                            fontSize: 16, color: Colors.white),
                                       ),
                                     ),
                                   ),

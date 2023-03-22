@@ -95,7 +95,6 @@ class _ResetPasswordState extends State<ResetPassword> {
                                     true,
                                     emailController,
                                   ),
-                                 
                                   Row(
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceAround,
@@ -113,7 +112,9 @@ class _ResetPasswordState extends State<ResetPassword> {
                                               //   msg:
                                               //   'Forgotten password! button pressed',
                                               // );
-                                              appAuthentication.navigatePageReal(context, const LoginScreen());
+                                              appAuthentication
+                                                  .navigatePageReal(context,
+                                                      const LoginScreen());
                                             },
                                         ),
                                       ),
@@ -128,10 +129,10 @@ class _ResetPasswordState extends State<ResetPassword> {
                                         isLoading = true;
                                       });
 
-                                      final isValid =
-                                          await appAuthentication.verifyForgotPassword(
-                                              emailController.text,
-                                              );
+                                      final isValid = await appAuthentication
+                                          .verifyForgotPassword(
+                                        emailController.text,
+                                      );
 
                                       if (isValid != "valid") {
                                         ScaffoldMessenger.of(context)
@@ -142,30 +143,33 @@ class _ResetPasswordState extends State<ResetPassword> {
                                                 Colors.red.withOpacity(0.6),
                                           ),
                                         );
-
+                                        setState(() => {isLoading = false});
                                         return;
                                       }
-                                      PasswordLogic passwordLogic= PasswordLogic();
-
-                                      ResponseData forgotPassword = await passwordLogic.forgotPassword(
-                                          emailController.text);
-
-                                      if (forgotPassword.success == true) {
+                                      PasswordLogic passwordLogic =
+                                          PasswordLogic();
+                                      var forgotPassword = await passwordLogic
+                                          .forgotPassword(emailController.text);
+                                      if (forgotPassword["success"]) {
                                         await appAuthentication
-                                            .storeTokenVariable(emailController.text, "password_reset_email");
-                                        appAuthentication.navigatePage(context, const ResetPasswordMain());
-                                        
+                                            .storeTokenVariable(
+                                                emailController.text,
+                                                "password_reset_email");
+                                        appAuthentication.navigatePage(
+                                            context, const ResetPasswordMain());
                                       } else {
                                         ScaffoldMessenger.of(context)
                                             .showSnackBar(
                                           SnackBar(
-                                            content: Text(forgotPassword.message),
+                                            content: const Text(
+                                                "Something went wrong, please check your email address"),
                                             backgroundColor:
                                                 Colors.red.withOpacity(0.6),
                                           ),
                                         );
+
+                                        setState(() => {isLoading = false});
                                       }
-                                      setState(() => isLoading = false);
                                       // Navigator.push(
                                       //   context,
                                       //   MaterialPageRoute(builder: (context) => const AppContainer()),
@@ -185,7 +189,9 @@ class _ResetPasswordState extends State<ResetPassword> {
                                         borderRadius: BorderRadius.circular(20),
                                       ),
                                       child: Text(
-                                        isLoading ? 'Processing...' : 'Sign-In',
+                                        isLoading
+                                            ? 'Processing...'
+                                            : 'Reset Password',
                                         style: const TextStyle(
                                           color: Colors.white,
                                           fontSize: 20,

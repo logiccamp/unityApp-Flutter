@@ -202,6 +202,8 @@ class _SendParcelRecepientState extends State<SendParcelRecepient> {
                             });
                             var addParcel = await parcelLogic.addParcel(
                                 firstStep, secondStep);
+                            Navigator.pop(context);
+
                             if (addParcel.success == true) {
                               setState(() {
                                 isLoading = false;
@@ -211,7 +213,7 @@ class _SendParcelRecepientState extends State<SendParcelRecepient> {
                               setState(() {
                                 isLoading = false;
                               });
-                              Navigator.pop(context);
+                              // Navigator.pop(context);
                               ScaffoldMessenger.of(context)
                                   .showSnackBar(SnackBar(
                                 content: Text(addParcel.message),
@@ -336,11 +338,11 @@ class _SendParcelRecepientState extends State<SendParcelRecepient> {
               },
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Container(
                     margin: const EdgeInsets.only(bottom: 10),
-                    height: _selectedDeliveryMode == index ? 150 : 120,
+                    height: 120,
                     width: double.maxFinite,
                     decoration: BoxDecoration(
                         color: _selectedDeliveryMode == index

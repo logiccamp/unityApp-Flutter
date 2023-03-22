@@ -9,15 +9,14 @@ import 'parcel_status.dart';
 import 'title_with_avatar.dart';
 
 class Summary extends StatelessWidget {
-  Summary(
-      {Key? key,
-      required this.size,
-      required this.afterCommand,
-      required this.firstStep,
-      required this.secondStep,
-      required this.isLoading,
-      })
-      : super(key: key);
+  Summary({
+    Key? key,
+    required this.size,
+    required this.afterCommand,
+    required this.firstStep,
+    required this.secondStep,
+    required this.isLoading,
+  }) : super(key: key);
 
   final Size size;
   FirstStep firstStep;
@@ -258,7 +257,7 @@ class Summary extends StatelessWidget {
               child: AppButton(
                   size: size,
                   text: isLoading ? "processing" : "Submit Now",
-                  onpress: () => {isLoading ? null : afterCommand()}),
+                  onpress: () => {afterCommand()}),
             ),
           )
         ],

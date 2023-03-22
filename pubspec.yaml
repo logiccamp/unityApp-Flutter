@@ -84,6 +84,8 @@ flutter:
     - assets/images/users.png
     - assets/images/parcel.png
     - assets/images/staffs.png
+    - assets/icons/user_icon.png
+    - assets/images/user_avatar.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.

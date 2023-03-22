@@ -35,8 +35,7 @@ class _AppState extends State<App> {
         case "Logout":
           AppAuthentication appAuthentication = AppAuthentication();
           await appAuthentication.logout();
-          Navigator.of(context).push(
-              MaterialPageRoute(builder: (context) => const LoginScreen()));
+          appAuthentication.navigatePageReal(context, const LoginScreen());
           break;
         default:
       }

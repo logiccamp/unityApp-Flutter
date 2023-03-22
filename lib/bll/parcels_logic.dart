@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:ffi';
 
 import 'package:unitycargo/resources/app_authentication.dart';
 import 'package:unitycargo/resources/first_step.dart';
@@ -24,7 +25,24 @@ class Parcel {
         "Authorization": "Bearer " + token,
         "token": token,
       });
+      print(json.decode(response.body));
+      return json.decode(response.body);
+    } catch (e) {
+      print(e);
+      return "error";
+    }
+  }
 
+  Future AllParcelsAdmin() async {
+    try {
+      String path = url + "all-item-pickup";
+      String token = await appAuthentication.getTokenAdmin();
+      var response = await http.get(Uri.parse(path), headers: {
+        "accept": "application/json",
+        "Authorization": "Bearer " + token,
+        "token": token,
+      });
+      print(json.decode(response.body));
       return json.decode(response.body);
     } catch (e) {
       return "error";
@@ -33,13 +51,9 @@ class Parcel {
 
   Future GetParcel(id) async {
     String path = url + "item-pickup/" + id;
-    String token = await appAuthentication.getToken();
     var response = await http.get(Uri.parse(path), headers: {
       "accept": "application/json",
-      "Authorization": "Bearer " + token,
-      "token": token,
     });
-    print(json.decode(response.body));
     return json.decode(response.body);
   }
 
@@ -71,7 +85,7 @@ class Parcel {
       "delivery_type": secondStep.deliveryMode,
       "payment_type": "Offline",
     };
-
+    print(data);
     try {
       var response = await http.post(
         Uri.parse(path),
@@ -83,13 +97,46 @@ class Parcel {
         },
       );
       var res = json.decode(response.body);
+      print(res);
       if (response.statusCode > 201) {
-        return ResponseData(false, res["error"], "");
+        return ResponseData(false, res["error"], "", "");
       } else {
-        return ResponseData(true, res["message"], "");
+        return ResponseData(true, res["message"], "", "");
       }
     } catch (e) {
-      return ResponseData(false, e.toString(), "");
+      return ResponseData(false, e.toString(), "", "");
+    }
+  }
+
+  Future addHistory(String report, String trackingId) async {
+    try {
+      String path = "${url}add-history/" + trackingId;
+      String token = await appAuthentication.getTokenAdmin();
+      var response = await http.post(Uri.parse(path), body: {
+        "report": report
+      }, headers: {
+        "accept": "application/json",
+        "Authorization": "Bearer " + token,
+        "token": token,
+      });
+      return json.decode(response.body);
+    } catch (e) {
+      return e;
+    }
+  }
+
+  Future deleteHistory(String id) async {
+    try {
+      String path = "${url}delete-history/" + id;
+      String token = await appAuthentication.getTokenAdmin();
+      var response = await http.get(Uri.parse(path), headers: {
+        "accept": "application/json",
+        "Authorization": "Bearer " + token,
+        "token": token,
+      });
+      return json.decode(response.body);
+    } catch (e) {
+      return e;
     }
   }
 }

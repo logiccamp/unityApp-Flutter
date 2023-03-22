@@ -7,6 +7,7 @@ import 'package:unitycargo/app/appconatiner.dart';
 import 'package:unitycargo/app/createaccount.dart';
 import 'package:unitycargo/app/reset_password.dart';
 import 'package:unitycargo/resources/app_authentication.dart';
+import 'package:unitycargo/staff/add_staff.dart';
 import 'package:unitycargo/staff/dashboard_admin.dart';
 import 'package:unitycargo/staff/login.dart';
 import 'package:unitycargo/utils/colors.dart';
@@ -113,8 +114,9 @@ class _LoginScreenState extends State<LoginScreen> {
                                           recognizer: TapGestureRecognizer()
                                             ..onTap = () {
                                               HapticFeedback.lightImpact();
-                                              // appAuthentication.navigatePage(
-                                              //     context, const ResetPassword());
+                                              appAuthentication.navigatePage(
+                                                  context,
+                                                  const ResetPassword());
                                             },
                                         ),
                                       ),
@@ -138,6 +140,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                       ),
                                     ],
                                   ),
+                                  const SizedBox(height: kDefaultPadding),
                                   Row(
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceAround,
@@ -194,8 +197,8 @@ class _LoginScreenState extends State<LoginScreen> {
                                           passwordController.text);
 
                                       if (loginBLL.success == true) {
-                                        await appAuthentication
-                                            .setToken(loginBLL.token);
+                                        await appAuthentication.setToken(
+                                            loginBLL.token, "user");
                                         Navigator.push(
                                           context,
                                           MaterialPageRoute(

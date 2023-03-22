@@ -40,10 +40,9 @@ class ParcelStatus extends StatelessWidget {
                     color: status == 'Delivered' ? Colors.green : Colors.black)
                 : Container()
           ],
-          
         ),
         const SizedBox(
-          height: 35,
+          height: 25,
         ),
         TitleWithAvartar(
           text: status,

@@ -7,32 +7,37 @@ import 'package:unitycargo/utils/app_urls.dart';
 import 'dart:convert';
 
 class PasswordLogic {
-  Future<ResponseData> forgotPassword(email) async {
+  Future forgotPassword(email) async {
     String path = url + "forgot-password";
-    var data = {"email" : email};
-    var response = await http.post(Uri.parse(path), headers: {
-      "accept": "application/json",
-    }, body: data);
+    var data = {"email": email};
+    var response = await http.post(Uri.parse(path),
+        headers: {
+          "accept": "application/json",
+        },
+        body: data);
 
     var res = json.decode(response.body);
-
-    return ResponseData(res["status"], res["message"], "");
+    return res;
+    //return ResponseData(res["status"], res["message"], "", "");
   }
 
-  Future<ResponseData> resetPassword(email, token, password, newPassword)async{
+  Future<ResponseData> resetPassword(
+      email, token, password, newPassword) async {
     String path = url + "reset-password";
     var data = {
-      "email" : email,
-      "token" : token,
-      "password" : password,
-      "password_confirmation" : newPassword,
-      };
-    var response = await http.post(Uri.parse(path), headers: {
-      "accept": "application/json",
-    }, body: data);
+      "email": email,
+      "otp": token,
+      "password": password,
+      "password_confirmation": newPassword,
+    };
+    var response = await http.post(Uri.parse(path),
+        headers: {
+          "accept": "application/json",
+        },
+        body: data);
 
     var res = json.decode(response.body);
-
-    return ResponseData(res["status"], res["message"], "");
+    print(res);
+    return ResponseData(res["success"], res["message"], "", "");
   }
 }

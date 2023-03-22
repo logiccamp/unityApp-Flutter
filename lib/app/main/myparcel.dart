@@ -59,11 +59,12 @@ class _MyParcelState extends State<MyParcel> {
         Navigator.push(context,
             MaterialPageRoute(builder: (context) => const LoginScreen()));
       }
-
       var parcels = response["data"];
-      for (var p in parcels) {
-        var pr = ParcelResponse.fromJson(p);
-        parcelsList_.add(pr);
+      if (response["success"] == true) {
+        for (var p in parcels) {
+          var pr = ParcelResponse.fromJson(p);
+          parcelsList_.add(pr);
+        }
       }
       setState(() {
         parcelsList = parcelsList_;

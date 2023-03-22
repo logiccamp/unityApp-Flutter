@@ -14,11 +14,14 @@ Future<ResponseData> login(String email, String password) async {
     );
     var res = json.decode(response.body);
     if (response.statusCode > 201) {
-      return ResponseData(false, res["error"], "");
+      return ResponseData(false, res["error"], "", "");
     }
-    return ResponseData(true, res["data"]["message"], res["data"]["token"]);
+    var responseData = ResponseData(true, res["data"]["message"],
+        res["data"]["token"], res["data"]["role"]);
+
+    return responseData;
   } catch (e) {
     print(e);
-    return ResponseData(false, "An error occur", "");
+    return ResponseData(false, "An error occur", "", "");
   }
 }

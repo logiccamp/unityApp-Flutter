@@ -8,8 +8,8 @@ import 'package:timeago/timeago.dart' as timeago;
 import '../../../bll/parcels_logic.dart';
 import '../../../utils/colors.dart';
 import '../../../utils/utils.dart';
-import 'parcel_status.dart';
-import 'title_with_avatar.dart';
+import '../app/main/mypacel/parcel_status.dart';
+import '../app/main/mypacel/title_with_avatar.dart';
 
 class Details extends StatefulWidget {
   Details({
@@ -56,7 +56,6 @@ class _DetailsState extends State<Details> {
           isLoading = false;
           isParcel = true;
           Parcel_ = response["data"];
-          print(Parcel_);
         });
       }
     });
@@ -106,6 +105,9 @@ class _DetailsState extends State<Details> {
                           )
                         ],
                       ),
+                      const SizedBox(
+                        height: kDefaultPadding,
+                      ),
                       Column(children: [
                         const SizedBox(
                           height: kDefaultPadding,
@@ -124,7 +126,6 @@ class _DetailsState extends State<Details> {
                         ),
                         Image.asset(
                           "assets/images/in_transit.png",
-                          height: 300.0,
                         ),
                         const SizedBox(
                           height: kDefaultPadding,

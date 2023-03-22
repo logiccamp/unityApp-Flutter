@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:unitycargo/app/login.dart';
 import 'package:unitycargo/resources/first_step.dart';
 import 'package:unitycargo/resources/second_step.dart';
+import 'package:unitycargo/resources/staff_data.dart';
 
 import 'user_data.dart';
 
@@ -55,14 +56,33 @@ class AppAuthentication {
     return "valid";
   }
 
+  Future verifyForgotPasswordToken(token) async {
+    if (token == "") {
+      return "Token is required";
+    }
+
+    return "valid";
+  }
+
   Future getToken() async {
     SharedPreferences pref = await SharedPreferences.getInstance();
     return pref.getString("token").toString();
   }
 
-  Future setToken(String token) async {
+  Future getTokenAdmin() async {
     SharedPreferences pref = await SharedPreferences.getInstance();
-    pref.setString("token", token);
+    return pref.getString("admin").toString();
+  }
+
+  Future setToken(String token, String? type) async {
+    if (type == "user") {
+      SharedPreferences pref = await SharedPreferences.getInstance();
+      pref.setString("token", token);
+    }
+    if (type == "admin") {
+      SharedPreferences pref = await SharedPreferences.getInstance();
+      pref.setString("admin", token);
+    }
   }
 
   Future storeTokenVariable(String value, String identifier) async {
@@ -121,6 +141,22 @@ class AppAuthentication {
 
   Future validPasswordChange(old, new_, confirm) async {
     if (old == "" || new_ == "" || confirm == "") {
+      return "All fields are required";
+    }
+
+    if (new_.length < 8) {
+      return "Password must be 8 character or more";
+    }
+
+    if (new_ != confirm) {
+      return "Confirm password not matched";
+    }
+
+    return "valid";
+  }
+
+  Future validPasswordChange2(new_, confirm) async {
+    if (new_ == "" || confirm == "") {
       return "All fields are required";
     }
 
@@ -209,6 +245,33 @@ class AppAuthentication {
 
     if (secondStep.state == "Select State") {
       return "Please select state";
+    }
+
+    return "valid";
+  }
+
+  Future validateStaff(Staff staff) async {
+    if (staff.firstname == "") {
+      return "firstname cannot be empty";
+    }
+
+    if (staff.lastname == "") {
+      return "lastname cannot be empty";
+    }
+
+    if (staff.email == "") {
+      return "email cannot be empty";
+    }
+
+    if (staff.phone == "") {
+      return "telephone cannot be empty";
+    }
+
+    if (staff.email == "") {
+      return "email cannot be empty";
+    }
+    if (staff.post == "") {
+      return "Post cannot be empty";
     }
 
     return "valid";

@@ -54,9 +54,11 @@ class _ParcelsListState extends State<ParcelsList> {
     }
 
     var parcels = response["data"];
-    for (var p in parcels) {
-      var pr = ParcelResponse.fromJson(p);
-      parcelsList_.add(pr);
+    if (response["success"] == true) {
+      for (var p in parcels) {
+        var pr = ParcelResponse.fromJson(p);
+        parcelsList_.add(pr);
+      }
     }
     setState(() {
       isLoading = false;
