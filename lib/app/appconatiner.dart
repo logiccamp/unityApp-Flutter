@@ -5,6 +5,7 @@ import 'package:unitycargo/app/main/myparcel.dart';
 import 'package:unitycargo/app/main/profile.dart';
 import 'package:unitycargo/app/main/sendparcel.dart';
 
+// ignore: must_be_immutable
 class AppContainer extends StatefulWidget {
   AppContainer({Key? key, this.selectedIndex = 0}) : super(key: key);
   int selectedIndex = 0;
@@ -28,7 +29,7 @@ class _AppContainerState extends State<AppContainer> {
         bottomNavigationBar: NavigationBarTheme(
           data: NavigationBarThemeData(
               indicatorColor: Colors.blue.shade100,
-              backgroundColor: Color(0xFFF1f5fb),
+              backgroundColor: const Color(0xFFF1f5fb),
               labelTextStyle: MaterialStateProperty.all(
                   TextStyle(fontSize: 14, fontWeight: FontWeight.w500))),
           child: NavigationBar(
