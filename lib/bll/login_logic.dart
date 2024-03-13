@@ -21,7 +21,6 @@ Future<ResponseData> login(String email, String password) async {
 
     return responseData;
   } catch (e) {
-    print(e);
     return ResponseData(false, "An error occur", "", "");
   }
 }

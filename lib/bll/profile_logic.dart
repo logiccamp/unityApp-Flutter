@@ -17,7 +17,6 @@ class ProfileLogic {
     });
 
     var res = json.decode(response.body);
-    print(res);
     return User.fromJson(res["data"]);
   }
 

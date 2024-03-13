@@ -56,7 +56,6 @@ class _DetailsState extends State<Details> {
           isLoading = false;
           isParcel = true;
           Parcel_ = response["data"];
-          print(Parcel_);
         });
       }
     });

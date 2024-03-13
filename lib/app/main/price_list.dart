@@ -33,7 +33,6 @@ class _PriceListState extends State<PriceList> {
   void fetchPrices() async {
     var response = await _price.Get();
     List<PriceListResponse> priceList_2 = [];
-    print(response);
     var parcels = response["data"];
     for (var p in parcels) {
       var pr = PriceListResponse.fromJson(p);

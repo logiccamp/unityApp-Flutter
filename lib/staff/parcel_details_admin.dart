@@ -216,7 +216,6 @@ class _AdminParcelDetailsState extends State<AdminParcelDetails> {
                                               message.text, email);
                                           bool mailSent =
                                               await SendMail().Send(mail);
-                                          print(mailSent);
                                           if (mailSent) {
                                             subject.text = "";
                                             message.text = "";

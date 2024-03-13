@@ -275,7 +275,7 @@ class _SendParcelRecepientState extends State<SendParcelRecepient> {
                           margin:
                               const EdgeInsets.only(top: kDefaultPadding / 2),
                           alignment: Alignment.center,
-                          padding: EdgeInsets.all(kDefaultPadding / 2),
+                          padding: const EdgeInsets.all(kDefaultPadding / 2),
                           decoration: BoxDecoration(
                               boxShadow: [
                                 BoxShadow(
@@ -342,7 +342,7 @@ class _SendParcelRecepientState extends State<SendParcelRecepient> {
                 children: [
                   Container(
                     margin: const EdgeInsets.only(bottom: 10),
-                    height: 120,
+                    height: 100,
                     width: double.maxFinite,
                     decoration: BoxDecoration(
                         color: _selectedDeliveryMode == index

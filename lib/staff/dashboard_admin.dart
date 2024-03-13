@@ -31,7 +31,6 @@ class _AdminDashboardState extends State<AdminDashboard> {
 
   @override
   void initState() {
-    print("hello");
     // TODO: implement initState
     super.initState();
     isLoading = true;

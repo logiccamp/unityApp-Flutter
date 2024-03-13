@@ -35,7 +35,6 @@ class _ParcelSearchState extends State<ParcelSearch> {
   }
 
   void GetUser() {
-    print("ello");
     setState(() {
       isLoading = true;
     });

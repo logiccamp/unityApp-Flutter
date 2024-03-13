@@ -19,7 +19,6 @@ Future signup(String email, String password, String firstname, String lastname,
     var response = await http.post(Uri.parse(path),
         body: (data), headers: {"accept": "application/json"});
     var res = json.decode(response.body);
-    print(response.body);
     if (response.statusCode == 401) {
       return "One or more input is invalid";
     }
