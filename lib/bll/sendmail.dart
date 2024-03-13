@@ -23,7 +23,6 @@ class SendMail {
       "token": token,
     });
     var res = json.decode(response.body);
-    print(res);
     if (res == true) {
       isSuccess = true;
     }

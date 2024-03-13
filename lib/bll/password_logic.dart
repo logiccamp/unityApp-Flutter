@@ -37,7 +37,6 @@ class PasswordLogic {
         body: data);
 
     var res = json.decode(response.body);
-    print(res);
     return ResponseData(res["success"], res["message"], "", "");
   }
 }

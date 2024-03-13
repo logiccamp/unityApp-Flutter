@@ -48,7 +48,6 @@ class _UsersListState extends State<UsersList> {
     // TODO: implement initState
     super.initState();
     getUsers();
-    print(widget.user_type);
   }
 
   @override

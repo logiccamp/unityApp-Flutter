@@ -25,10 +25,8 @@ class Parcel {
         "Authorization": "Bearer " + token,
         "token": token,
       });
-      print(json.decode(response.body));
       return json.decode(response.body);
     } catch (e) {
-      print(e);
       return "error";
     }
   }
@@ -42,7 +40,6 @@ class Parcel {
         "Authorization": "Bearer " + token,
         "token": token,
       });
-      print(json.decode(response.body));
       return json.decode(response.body);
     } catch (e) {
       return "error";
@@ -85,7 +82,6 @@ class Parcel {
       "delivery_type": secondStep.deliveryMode,
       "payment_type": "Offline",
     };
-    print(data);
     try {
       var response = await http.post(
         Uri.parse(path),
@@ -97,7 +93,6 @@ class Parcel {
         },
       );
       var res = json.decode(response.body);
-      print(res);
       if (response.statusCode > 201) {
         return ResponseData(false, res["error"], "", "");
       } else {

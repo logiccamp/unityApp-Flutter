@@ -17,9 +17,7 @@ class User {
       for (var p in parcels) {
         Parcels.add(ParcelResponse.fromJson(p));
       }
-    } catch (e) {
-      print(e);
-    }
+    } catch (e) {}
     firstname = json["firstname"];
     lastname = json["lastname"].toString();
     phone = json["phone_number"];
