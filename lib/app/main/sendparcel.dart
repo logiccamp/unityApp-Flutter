@@ -61,8 +61,13 @@ class _SendParcelState extends State<SendParcel> {
     if (picked != null) {
       // setState(() {
       selectedTime = picked;
+      var h = double.parse(selectedTime.hour.toString());
       var _hour = selectedTime.hour.toString();
+      _hour = h < 10 ? '0' + _hour : _hour;
       var _minute = selectedTime.minute.toString();
+      var m = double.parse(selectedTime.minute.toString());
+      _minute = m < 10 ? '0' + _minute : _minute;
+
       var _time = _hour + ' : ' + _minute;
       setState(() {
         _timeController.text = _time;
@@ -84,12 +89,14 @@ class _SendParcelState extends State<SendParcel> {
         lastDate: DateTime(2101));
     if (picked != null) {
       setState(() {
+        var _mm = selectedDate.month.toString();
+        _mm =
+            double.parse(selectedDate.month.toString()) < 10 ? '0' + _mm : _mm;
+        var _dd = selectedDate.day.toString();
+        _dd = double.parse(selectedDate.day.toString()) < 10 ? '0' + _dd : _dd;
         selectedDate = picked;
-        _dateController.text = selectedDate.year.toString() +
-            "-" +
-            selectedDate.month.toString() +
-            "-" +
-            selectedDate.day.toString();
+        _dateController.text =
+            selectedDate.year.toString() + "-" + _mm + "-" + _dd;
         // _dateController.text = DateFormat.yMd().format(selectedDate);
       });
     }
@@ -116,6 +123,10 @@ class _SendParcelState extends State<SendParcel> {
     String isValid = await appAuthentication.validateFirstStep(firstStep);
 
     if (isValid != "valid") {
+      setState(() {
+        isLoading = false;
+      });
+
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(isValid),
         backgroundColor: Colors.red,
@@ -135,15 +146,18 @@ class _SendParcelState extends State<SendParcel> {
 
   @override
   void initState() {
-    _dateController.text = DateTime.now().year.toString() +
-        "-" +
-        DateTime.now().month.toString() +
-        "-" +
-        DateTime.now().day.toString();
+    var _mm = DateTime.now().month.toString();
+    var _dd = DateTime.now().day.toString();
+    _dd = double.parse(DateTime.now().day.toString()) < 10 ? '0' + _dd : _dd;
+    _mm = double.parse(DateTime.now().month.toString()) < 10 ? '0' + _mm : _mm;
+    _dateController.text =
+        DateTime.now().year.toString() + "-" + _mm + "-" + _dd;
 
-    _timeController.text = TimeOfDay.now().hour.toString() +
-        ':' +
-        TimeOfDay.now().minute.toString();
+    var _h = TimeOfDay.now().hour.toString();
+    _h = double.parse(TimeOfDay.now().hour.toString()) < 10 ? '0' + _h : _h;
+    var _m = TimeOfDay.now().minute.toString();
+    _m = double.parse(TimeOfDay.now().minute.toString()) < 10 ? '0' + _m : _m;
+    _timeController.text = _h + ':' + _m;
     super.initState();
   }
 
