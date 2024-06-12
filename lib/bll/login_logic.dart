@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:unitycargo/resources/app_authentication.dart';
 import '../resources/response_data.dart';
 import '../utils/app_urls.dart';
 
@@ -22,5 +23,26 @@ Future<ResponseData> login(String email, String password) async {
     return responseData;
   } catch (e) {
     return ResponseData(false, "An error occur", "", "");
+  }
+}
+
+Future<String> deleteAccount() async {
+  try {
+    var appAuthentication = AppAuthentication();
+
+    String token = await appAuthentication.getToken();
+    String path = url + "delete-account";
+    var response = await http.get(Uri.parse(path), headers: {
+      "accept": "application/json",
+      "Authorization": "Bearer " + token,
+      "token": token,
+    });
+
+    if (response.statusCode > 201) {
+      return "We are unable to delete your account at the moment";
+    }
+    return "success";
+  } catch (e) {
+    return "We are unable to delete your account at the moment";
   }
 }

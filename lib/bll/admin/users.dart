@@ -18,8 +18,10 @@ class UsersClass {
         "Authorization": "Bearer " + token,
         "token": token,
       });
+      print(response.body);
       return json.decode(response.body);
     } catch (e) {
+      print(e);
       return "error";
     }
   }
@@ -36,7 +38,9 @@ class UsersClass {
       });
 
       var res = json.decode(response.body);
-      return User.fromJson(res["data"]);
+      print(res["data"]);
+      User u = User.fromJson(res["data"]);
+      return u;
     } catch (e) {
       return "error";
     }

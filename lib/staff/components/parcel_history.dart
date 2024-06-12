@@ -92,7 +92,19 @@ class _NewParcelHistoryState extends State<NewParcelHistory> {
                           size: MediaQuery.of(context).size,
                           onpress: () {
                             widget.isLoading ? () {} : saveDetails();
-                          })
+                          }),
+                      SizedBox(
+                        height: 14,
+                      ),
+                      InkWell(
+                        child: Text(
+                          "Close",
+                          style: TextStyle(color: Colors.red),
+                        ),
+                        onTap: () {
+                          Navigator.of(context).pop();
+                        },
+                      )
                     ],
                   ),
                 ),

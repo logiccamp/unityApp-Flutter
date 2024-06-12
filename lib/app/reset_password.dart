@@ -143,33 +143,49 @@ class _ResetPasswordState extends State<ResetPassword> {
                                                 Colors.red.withOpacity(0.6),
                                           ),
                                         );
-                                        setState(() => {isLoading = false});
+                                        setState(() => isLoading = false);
                                         return;
                                       }
-                                      PasswordLogic passwordLogic =
-                                          PasswordLogic();
-                                      var forgotPassword = await passwordLogic
-                                          .forgotPassword(emailController.text);
-                                      if (forgotPassword["success"]) {
-                                        await appAuthentication
-                                            .storeTokenVariable(
-                                                emailController.text,
-                                                "password_reset_email");
-                                        appAuthentication.navigatePage(
-                                            context, const ResetPasswordMain());
-                                      } else {
+                                      try {
+                                        PasswordLogic passwordLogic =
+                                            PasswordLogic();
+                                        var forgotPassword =
+                                            await passwordLogic.forgotPassword(
+                                                emailController.text);
+                                        if (forgotPassword["success"]) {
+                                          await appAuthentication
+                                              .storeTokenVariable(
+                                                  emailController.text,
+                                                  "password_reset_email");
+                                          appAuthentication.navigatePage(
+                                              context,
+                                              const ResetPasswordMain());
+                                        } else {
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(
+                                            SnackBar(
+                                              content: const Text(
+                                                  "Something went wrong, please check your email address"),
+                                              backgroundColor:
+                                                  Colors.red.withOpacity(0.6),
+                                            ),
+                                          );
+
+                                          setState(() => isLoading = false);
+                                        }
+                                      } catch (e) {
                                         ScaffoldMessenger.of(context)
                                             .showSnackBar(
                                           SnackBar(
                                             content: const Text(
-                                                "Something went wrong, please check your email address"),
+                                                "Something went wrong"),
                                             backgroundColor:
                                                 Colors.red.withOpacity(0.6),
                                           ),
                                         );
-
-                                        setState(() => {isLoading = false});
+                                        setState(() => isLoading = false);
                                       }
+
                                       // Navigator.push(
                                       //   context,
                                       //   MaterialPageRoute(builder: (context) => const AppContainer()),

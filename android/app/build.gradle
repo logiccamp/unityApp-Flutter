@@ -27,7 +27,7 @@ if (keystorePropertiesFile.exists()) {
     keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
 }
 android {
-    namespace "com.maxedge.unitycargo"
+    namespace "com.example.unityapp"
     compileSdk flutter.compileSdkVersion
     ndkVersion flutter.ndkVersion
 

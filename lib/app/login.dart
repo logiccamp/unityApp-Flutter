@@ -141,30 +141,6 @@ class _LoginScreenState extends State<LoginScreen> {
                                     ],
                                   ),
                                   const SizedBox(height: kDefaultPadding),
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceAround,
-                                    children: [
-                                      InkWell(
-                                        onTap: () {
-                                          Navigator.of(context).push(
-                                            MaterialPageRoute(
-                                                builder: (context) =>
-                                                    StaffLogin()),
-                                          );
-                                        },
-                                        child: const Text(
-                                          "Staff Portal",
-                                          style: TextStyle(
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.w900,
-                                            fontSize: 16,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  SizedBox(height: size.width * .3),
                                   InkWell(
                                     splashColor: Colors.transparent,
                                     highlightColor: Colors.transparent,
@@ -244,6 +220,31 @@ class _LoginScreenState extends State<LoginScreen> {
                                       ),
                                     ),
                                   ),
+                                  SizedBox(height: size.width * .3),
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceAround,
+                                    children: [
+                                      InkWell(
+                                        onTap: () {
+                                          Navigator.of(context).push(
+                                            MaterialPageRoute(
+                                                builder: (context) =>
+                                                    StaffLogin()),
+                                          );
+                                        },
+                                        child: const Text(
+                                          "Staff Portal",
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.w900,
+                                            fontSize: 16,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 20.0),
                                 ],
                               ),
                             ),

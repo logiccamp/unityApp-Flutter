@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter/gestures.dart';
@@ -74,8 +75,9 @@ class _SendParcelRecepientState extends State<SendParcelRecepient> {
     }
   }
 
-  Future submitRequest() async {
+  Future<String> submitRequest() async {
     // firstname, lastname, address, phone1, phone2, city, state, deliveryMode
+
     setState(() {
       secondStep = SecondStep(
           r_firstname.text,
@@ -90,40 +92,46 @@ class _SendParcelRecepientState extends State<SendParcelRecepient> {
 
     String isValid =
         await appAuthentication.validateFirstStep(widget.firstStep);
-    setState(() {
-      isLoading = false;
-    });
+
     if (isValid != "valid") {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text("Please enter sender's information"),
         backgroundColor: Colors.red,
       ));
-
+      setState(() {
+        isLoading = false;
+      });
       Navigator.push(
         context,
         MaterialPageRoute(
           builder: (context) => AppContainer(selectedIndex: 1),
         ),
       );
-      return;
+      return "error";
     }
     String isValid2 = await appAuthentication.validateSecondStep(secondStep);
-
     if (isValid2 != "valid") {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(isValid2),
         backgroundColor: Colors.red,
       ));
-      return;
+      setState(() {
+        isLoading = false;
+      });
+      return "error";
     }
+    setState(() {
+      isLoading = false;
+    });
+    return "success";
   }
 
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
-    void _onFinal(context, status) {
-      Navigator.of(context).pop();
-      showModalBottomSheet(
+    void _onFinal() async {
+      // Navigator.of(context).pop();
+      await showModalBottomSheet(
           isDismissible: false,
           enableDrag: false,
           backgroundColor: Colors.white.withOpacity(0),
@@ -197,28 +205,31 @@ class _SendParcelRecepientState extends State<SendParcelRecepient> {
                           secondStep: secondStep,
                           size: size,
                           afterCommand: () async {
-                            setState(() {
-                              isLoading = true;
-                            });
-                            var addParcel = await parcelLogic.addParcel(
-                                firstStep, secondStep);
                             Navigator.pop(context);
 
-                            if (addParcel.success == true) {
+                            if (!isLoading) {
                               setState(() {
-                                isLoading = false;
+                                isLoading = true;
                               });
-                              _onFinal(context, "true");
-                            } else {
-                              setState(() {
-                                isLoading = false;
-                              });
+                              var addParcel = await parcelLogic.addParcel(
+                                  firstStep, secondStep);
                               // Navigator.pop(context);
-                              ScaffoldMessenger.of(context)
-                                  .showSnackBar(SnackBar(
-                                content: Text(addParcel.message),
-                                backgroundColor: Colors.red,
-                              ));
+                              if (addParcel.success == true) {
+                                setState(() {
+                                  isLoading = false;
+                                });
+                                _onFinal();
+                              } else {
+                                setState(() {
+                                  isLoading = false;
+                                });
+                                // Navigator.pop(context);
+                                ScaffoldMessenger.of(context)
+                                    .showSnackBar(SnackBar(
+                                  content: Text(addParcel.message),
+                                  backgroundColor: Colors.red,
+                                ));
+                              }
                             }
                           },
                         ),
@@ -298,11 +309,26 @@ class _SendParcelRecepientState extends State<SendParcelRecepient> {
                       const SizedBox(height: 20),
                       AppButton(
                         size: size,
-                        onpress: () {
+                        onpress: () async {
                           if (!isLoading) {
-                            submitRequest();
-                            _OpenParcel(context, secondStep, widget.firstStep);
+                            setState(() {
+                              isLoading = true;
+                            });
+
+                            Timer(const Duration(seconds: 2), () async {
+                              String validate = await submitRequest();
+                              if (validate == "success") {
+                                setState(() {
+                                  isLoading = false;
+                                });
+                                _OpenParcel(
+                                    context, secondStep, widget.firstStep);
+                              }
+                            });
                           }
+                          // setState(() {
+                          //   isLoading = false;
+                          // });
                         },
                         text: isLoading ? "processing..." : "Update",
                       ),

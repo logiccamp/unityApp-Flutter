@@ -61,14 +61,26 @@ class _SendParcelState extends State<SendParcel> {
     if (picked != null) {
       // setState(() {
       selectedTime = picked;
-      var h = double.parse(selectedTime.hour.toString());
       var _hour = selectedTime.hour.toString();
-      _hour = h < 10 ? '0' + _hour : _hour;
       var _minute = selectedTime.minute.toString();
-      var m = double.parse(selectedTime.minute.toString());
-      _minute = m < 10 ? '0' + _minute : _minute;
 
-      var _time = _hour + ' : ' + _minute;
+      var h = selectedTime.hour;
+      var t = selectedTime.minute;
+      String displayHour = "";
+      String displayTime = "";
+      if (h > 10) {
+        displayHour = h.toString();
+      } else {
+        displayHour = "0" + h.toString();
+      }
+
+      if (t > 10) {
+        displayTime = t.toString();
+      } else {
+        displayTime = "0" + t.toString();
+      }
+
+      var _time = displayHour + ' : ' + displayTime;
       setState(() {
         _timeController.text = _time;
       });
@@ -88,15 +100,29 @@ class _SendParcelState extends State<SendParcel> {
         firstDate: DateTime(2015),
         lastDate: DateTime(2101));
     if (picked != null) {
+      selectedDate = picked;
+
+      int o = selectedDate.month;
+      int d = selectedDate.day;
+      String displayMonth = "";
+      String displayDay = "";
+      if (o > 10) {
+        displayMonth = o.toString();
+      } else {
+        displayMonth = "0" + o.toString();
+      }
+
+      if (d > 10) {
+        displayDay = d.toString();
+      } else {
+        displayDay = "0" + d.toString();
+      }
       setState(() {
-        var _mm = selectedDate.month.toString();
-        _mm =
-            double.parse(selectedDate.month.toString()) < 10 ? '0' + _mm : _mm;
-        var _dd = selectedDate.day.toString();
-        _dd = double.parse(selectedDate.day.toString()) < 10 ? '0' + _dd : _dd;
-        selectedDate = picked;
-        _dateController.text =
-            selectedDate.year.toString() + "-" + _mm + "-" + _dd;
+        _dateController.text = selectedDate.year.toString() +
+            "-" +
+            displayMonth +
+            "-" +
+            displayDay;
         // _dateController.text = DateFormat.yMd().format(selectedDate);
       });
     }
@@ -123,14 +149,13 @@ class _SendParcelState extends State<SendParcel> {
     String isValid = await appAuthentication.validateFirstStep(firstStep);
 
     if (isValid != "valid") {
-      setState(() {
-        isLoading = false;
-      });
-
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(isValid),
         backgroundColor: Colors.red,
       ));
+      setState(() {
+        isLoading = false;
+      });
       return;
     }
     setState(() {
@@ -146,18 +171,40 @@ class _SendParcelState extends State<SendParcel> {
 
   @override
   void initState() {
-    var _mm = DateTime.now().month.toString();
-    var _dd = DateTime.now().day.toString();
-    _dd = double.parse(DateTime.now().day.toString()) < 10 ? '0' + _dd : _dd;
-    _mm = double.parse(DateTime.now().month.toString()) < 10 ? '0' + _mm : _mm;
-    _dateController.text =
-        DateTime.now().year.toString() + "-" + _mm + "-" + _dd;
+    int o = DateTime.now().month;
+    int d = DateTime.now().day;
+    String displayMonth = "";
+    String displayDay = "";
+    if (o > 10) {
+      displayMonth = o.toString();
+    } else {
+      displayMonth = "0" + o.toString();
+    }
 
-    var _h = TimeOfDay.now().hour.toString();
-    _h = double.parse(TimeOfDay.now().hour.toString()) < 10 ? '0' + _h : _h;
-    var _m = TimeOfDay.now().minute.toString();
-    _m = double.parse(TimeOfDay.now().minute.toString()) < 10 ? '0' + _m : _m;
-    _timeController.text = _h + ':' + _m;
+    if (d > 10) {
+      displayDay = d.toString();
+    } else {
+      displayDay = "0" + d.toString();
+    }
+
+    _dateController.text =
+        DateTime.now().year.toString() + "-" + displayMonth + "-" + displayDay;
+    var h = TimeOfDay.now().hour;
+    var t = TimeOfDay.now().minute;
+    String displayHour = "";
+    String displayTime = "";
+    if (h > 10) {
+      displayHour = h.toString();
+    } else {
+      displayHour = "0" + h.toString();
+    }
+
+    if (t > 10) {
+      displayTime = t.toString();
+    } else {
+      displayTime = "0" + t.toString();
+    }
+    _timeController.text = displayHour + ':' + displayTime;
     super.initState();
   }
 
@@ -238,7 +285,7 @@ class _SendParcelState extends State<SendParcel> {
                               Padding(
                                 padding: EdgeInsets.only(left: 8.0),
                                 child: Text(
-                                  isLoading ? "Processing" : 'Proceed',
+                                  isLoading ? "Processing..." : 'Proceed',
                                   style: const TextStyle(
                                       color: Colors.white, fontSize: 20),
                                 ),

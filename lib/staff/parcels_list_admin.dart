@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:unitycargo/app/main/mypacel/loading.dart';
+import 'package:unitycargo/app/main/mypacel/not_found.dart';
 import 'package:unitycargo/app/main/mypacel/parcel_card.dart';
 import 'package:unitycargo/staff/login.dart';
 import 'package:unitycargo/staff/parcel_details_admin.dart';
@@ -72,7 +73,7 @@ class _ParcelListAdminState extends State<ParcelListAdmin> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text("Parcels List"),
+        title: const Text("Parcels List"),
         actions: [
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -97,23 +98,26 @@ class _ParcelListAdminState extends State<ParcelListAdmin> {
       ),
       body: isLoading
           ? LoadingWidget(size: size)
-          : ListView.builder(
-              itemCount: parcelsList.length,
-              itemBuilder: (BuildContext context, int index) {
-                return ParcelCard(
-                  ontap: (trackingNumber) => {
-                    Navigator.of(context).push(MaterialPageRoute(
-                        builder: ((context) => AdminParcelDetails(
-                            trackingNumber: trackingNumber))))
-                  },
-                  percent:
-                      double.parse(parcelsList[index].percent.toString()) / 100,
-                  updatedAt: parcelsList[index].updated.toString(),
-                  parentWidth: parentWidth,
-                  status: parcelsList[index].status.toString().capitalize(),
-                  trackingNumber: parcelsList[index].tracking_id.toString(),
-                );
-              }),
+          : parcelsList.isEmpty
+              ? NotFound(size: 400.0, message: "No parcel found")
+              : ListView.builder(
+                  itemCount: parcelsList.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    return ParcelCard(
+                      ontap: (trackingNumber) => {
+                        Navigator.of(context).push(MaterialPageRoute(
+                            builder: ((context) => AdminParcelDetails(
+                                trackingNumber: trackingNumber))))
+                      },
+                      percent:
+                          double.parse(parcelsList[index].percent.toString()) /
+                              100,
+                      updatedAt: parcelsList[index].updated.toString(),
+                      parentWidth: parentWidth,
+                      status: parcelsList[index].status.toString().capitalize(),
+                      trackingNumber: parcelsList[index].tracking_id.toString(),
+                    );
+                  }),
     );
   }
 }

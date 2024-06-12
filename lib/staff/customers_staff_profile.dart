@@ -57,7 +57,7 @@ class _UserProfileState extends State<UserProfile> {
                 child: Stack(
                   children: [
                     Container(
-                        height: 200,
+                        height: 220,
                         color: blueColor,
                         width: double.maxFinite,
                         padding: const EdgeInsets.all(kDefaultPadding * 2),
@@ -86,7 +86,17 @@ class _UserProfileState extends State<UserProfile> {
                                       u_.firstname + " " + u_.lastname,
                                       style: TextStyle(color: Colors.white),
                                     )),
-                              )
+                              ),
+                              if (u_.role != "User")
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 2),
+                                  child: Title(
+                                      color: Colors.white,
+                                      child: Text(
+                                        u_.role,
+                                        style: TextStyle(color: Colors.white),
+                                      )),
+                                )
                             ],
                           ),
                         )),

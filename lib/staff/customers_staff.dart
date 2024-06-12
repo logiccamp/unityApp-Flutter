@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:unitycargo/app/login.dart';
 import 'package:unitycargo/app/main/mypacel/loading.dart';
+import 'package:unitycargo/app/main/mypacel/not_found.dart';
 import 'package:unitycargo/bll/admin/users.dart';
 import 'package:unitycargo/resources/user_data.dart';
 import 'package:unitycargo/staff/add_staff.dart';
@@ -29,7 +30,6 @@ class _UsersListState extends State<UsersList> {
       var pr = User.fromJson(u);
       users_.add(pr);
     }
-
     setState(() {
       isLoading = false;
     });
@@ -57,56 +57,52 @@ class _UsersListState extends State<UsersList> {
       appBar: AppBar(
         title: Text(widget.user_type),
         actions: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              widget.user_type == "Staff"
-                  ? InkWell(
-                      onTap: () {
-                        Navigator.of(context).push(MaterialPageRoute(
-                            builder: ((context) => AddStaff())));
-                      },
-                      child: Icon(
-                        Icons.add_outlined,
-                        color: Colors.white,
-                      ),
-                    )
-                  : Container(),
-              InkWell(
-                onTap: () {
-                  Navigator.of(context).push(MaterialPageRoute(
-                      builder: (_) => AdminSearch(
-                            type: widget.user_type,
-                          )));
-                },
-                child: const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: kDefaultPadding),
-                  child: Icon(
-                    Icons.search,
-                    color: Colors.white,
+          widget.user_type.toLowerCase() == "staff"
+              ? InkWell(
+                  onTap: () {
+                    Navigator.of(context).push(MaterialPageRoute(
+                        builder: ((context) => const AddStaff())));
+                  },
+                  child: const Icon(
+                    Icons.add_outlined,
+                    color: Colors.blue,
                   ),
-                ),
-              )
-            ],
+                )
+              : Container(),
+          InkWell(
+            onTap: () {
+              Navigator.of(context).push(MaterialPageRoute(
+                  builder: (_) => AdminSearch(
+                        type: widget.user_type,
+                      )));
+            },
+            child: const Padding(
+              padding: EdgeInsets.symmetric(horizontal: kDefaultPadding),
+              child: Icon(
+                Icons.search,
+                color: Colors.blue,
+              ),
+            ),
           )
         ],
       ),
       body: isLoading
           ? LoadingWidget(size: MediaQuery.of(context).size)
-          : ListView.builder(
-              itemCount: users_.length,
-              itemBuilder: (BuildContext context, int index) {
-                return AdminUserCard(
-                    viewProfile: () {
-                      viewProfile(users_[index].id);
-                    },
-                    fullname: users_[index].firstname.toString() +
-                        " " +
-                        users_[index].lastname.toString(),
-                    user_type: widget.user_type.toString(),
-                    parcelCount: users_[index].Parcels.length);
-              }),
+          : users_.isEmpty
+              ? NotFound(size: 400.0, message: "No staff found.")
+              : ListView.builder(
+                  itemCount: users_.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    return AdminUserCard(
+                        viewProfile: () {
+                          viewProfile(users_[index].id);
+                        },
+                        fullname: users_[index].firstname.toString() +
+                            " " +
+                            users_[index].lastname.toString(),
+                        user_type: widget.user_type.toString(),
+                        parcelCount: users_[index].Parcels.length);
+                  }),
     );
   }
 }

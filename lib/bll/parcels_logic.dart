@@ -40,6 +40,7 @@ class Parcel {
         "Authorization": "Bearer " + token,
         "token": token,
       });
+
       return json.decode(response.body);
     } catch (e) {
       return "error";
@@ -114,6 +115,42 @@ class Parcel {
         "Authorization": "Bearer " + token,
         "token": token,
       });
+      return json.decode(response.body);
+    } catch (e) {
+      return e;
+    }
+  }
+
+  Future updateStatus(String status, String trackingId) async {
+    try {
+      String path = "${url}item-pickup/status/" + trackingId;
+      String token = await appAuthentication.getTokenAdmin();
+      var response = await http.post(Uri.parse(path), body: {
+        "status": status
+      }, headers: {
+        "accept": "application/json",
+        "Authorization": "Bearer " + token,
+        "token": token,
+      });
+      print(response.body);
+      return json.decode(response.body);
+    } catch (e) {
+      return e;
+    }
+  }
+
+  Future updateRider(String driver, String trackingId) async {
+    try {
+      String path = "${url}item-pickup/rider/" + trackingId;
+      String token = await appAuthentication.getTokenAdmin();
+      var response = await http.post(Uri.parse(path), body: {
+        "driver_id": driver
+      }, headers: {
+        "accept": "application/json",
+        "Authorization": "Bearer " + token,
+        "token": token,
+      });
+      print(response.body);
       return json.decode(response.body);
     } catch (e) {
       return e;

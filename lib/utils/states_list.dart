@@ -79,6 +79,12 @@ var appList = [
     "icondata": "settings"
   },
   {
+    "title": "Delete Account",
+    "routetype": "page",
+    "route": const Profile(),
+    "icondata": "trash"
+  },
+  {
     "title": "Logout",
     "routetype": "page",
     "route": const LoginScreen(),

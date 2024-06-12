@@ -8,7 +8,7 @@ import '../../../utils/colors.dart';
 import 'parcel_status.dart';
 import 'title_with_avatar.dart';
 
-class Summary extends StatelessWidget {
+class Summary extends StatefulWidget {
   Summary({
     Key? key,
     required this.size,
@@ -24,6 +24,11 @@ class Summary extends StatelessWidget {
   Function afterCommand;
   bool isLoading;
 
+  @override
+  State<Summary> createState() => _SummaryState();
+}
+
+class _SummaryState extends State<Summary> {
   @override
   Widget build(BuildContext context) {
     return Material(
@@ -77,31 +82,33 @@ class Summary extends StatelessWidget {
                   color: Colors.black,
                 ),
                 TitleWithAvartar(
-                  text: firstStep.firstname + " " + firstStep.lastname,
+                  text: widget.firstStep.firstname +
+                      " " +
+                      widget.firstStep.lastname,
                   textSize: 16,
                   color: Colors.black,
                   fontweight: FontWeight.w400,
                 ),
                 TitleWithAvartar(
-                  text: firstStep.telephone,
+                  text: widget.firstStep.telephone,
                   textSize: 16,
                   color: Colors.black,
                   fontweight: FontWeight.w400,
                 ),
                 TitleWithAvartar(
-                  text: firstStep.email,
+                  text: widget.firstStep.email,
                   textSize: 16,
                   color: Colors.black,
                   fontweight: FontWeight.w400,
                 ),
                 TitleWithAvartar(
-                  text: firstStep.address,
+                  text: widget.firstStep.address,
                   textSize: 16,
                   color: Colors.black,
                   fontweight: FontWeight.w400,
                 ),
                 TitleWithAvartar(
-                  text: firstStep.postal,
+                  text: widget.firstStep.postal,
                   textSize: 16,
                   color: Colors.black,
                   fontweight: FontWeight.w400,
@@ -129,39 +136,41 @@ class Summary extends StatelessWidget {
                   color: Colors.black,
                 ),
                 TitleWithAvartar(
-                  text: secondStep.firstname + " " + secondStep.lastname,
+                  text: widget.secondStep.firstname +
+                      " " +
+                      widget.secondStep.lastname,
                   textSize: 16,
                   color: Colors.black,
                   fontweight: FontWeight.w400,
                 ),
                 TitleWithAvartar(
-                  text: secondStep.address,
+                  text: widget.secondStep.address,
                   textSize: 16,
                   color: Colors.black,
                   fontweight: FontWeight.w400,
                 ),
                 TitleWithAvartar(
-                  text: secondStep.phone1,
+                  text: widget.secondStep.phone1,
                   textSize: 16,
                   color: Colors.black,
                   fontweight: FontWeight.w400,
                 ),
-                secondStep.phone2 == ""
+                widget.secondStep.phone2 == ""
                     ? Container()
                     : TitleWithAvartar(
-                        text: secondStep.phone2,
+                        text: widget.secondStep.phone2,
                         textSize: 16,
                         color: Colors.black,
                         fontweight: FontWeight.w400,
                       ),
                 TitleWithAvartar(
-                  text: "City : " + secondStep.city,
+                  text: "City : " + widget.secondStep.city,
                   textSize: 16,
                   color: Colors.black,
                   fontweight: FontWeight.w400,
                 ),
                 TitleWithAvartar(
-                  text: "State : " + secondStep.state,
+                  text: "State : " + widget.secondStep.state,
                   textSize: 16,
                   color: Colors.black,
                   fontweight: FontWeight.w400,
@@ -189,31 +198,31 @@ class Summary extends StatelessWidget {
                   color: Colors.black,
                 ),
                 TitleWithAvartar(
-                  text: firstStep.itemType,
+                  text: widget.firstStep.itemType,
                   textSize: 16,
                   color: Colors.black,
                   fontweight: FontWeight.w400,
                 ),
                 TitleWithAvartar(
-                  text: firstStep.commodityType,
+                  text: widget.firstStep.commodityType,
                   textSize: 16,
                   color: Colors.black,
                   fontweight: FontWeight.w400,
                 ),
                 TitleWithAvartar(
-                  text: "Pickup Date :" + firstStep.date,
+                  text: "Pickup Date :" + widget.firstStep.date,
                   textSize: 16,
                   color: Colors.black,
                   fontweight: FontWeight.w400,
                 ),
                 TitleWithAvartar(
-                  text: "Pickup Time : " + firstStep.time,
+                  text: "Pickup Time : " + widget.firstStep.time,
                   textSize: 16,
                   color: Colors.black,
                   fontweight: FontWeight.w400,
                 ),
                 TitleWithAvartar(
-                  text: "No. of Boxes : " + firstStep.noofboxes,
+                  text: "No. of Boxes : " + widget.firstStep.noofboxes,
                   textSize: 16,
                   color: Colors.black,
                   fontweight: FontWeight.w400,
@@ -241,7 +250,7 @@ class Summary extends StatelessWidget {
                   color: Colors.black,
                 ),
                 TitleWithAvartar(
-                  text: secondStep.deliveryMode,
+                  text: widget.secondStep.deliveryMode,
                   textSize: 16,
                   color: Colors.black,
                   fontweight: FontWeight.w400,
@@ -255,9 +264,9 @@ class Summary extends StatelessWidget {
           Container(
             child: Center(
               child: AppButton(
-                  size: size,
-                  text: isLoading ? "processing" : "Submit Now",
-                  onpress: () => {afterCommand()}),
+                  size: widget.size,
+                  text: "Submit Now",
+                  onpress: () => {widget.afterCommand()}),
             ),
           )
         ],

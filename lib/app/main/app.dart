@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:iconsax/iconsax.dart';
 import 'package:unitycargo/app/appconatiner.dart';
 import 'package:unitycargo/app/login.dart';
+import 'package:unitycargo/app/main/delete_account.dart';
 import 'package:unitycargo/app/main/location.dart';
-import 'package:unitycargo/app/main/mypacel/app_button.dart';
 import 'package:unitycargo/app/main/price_list.dart';
 import 'package:unitycargo/resources/app_authentication.dart';
 
@@ -27,6 +26,10 @@ class _AppState extends State<App> {
         case "Price List":
           Navigator.of(context)
               .push(MaterialPageRoute(builder: (context) => PriceList()));
+          break;
+        case "Delete Account":
+          Navigator.of(context)
+              .push(MaterialPageRoute(builder: (context) => DeleteAccount()));
           break;
         case "Our Location":
           Navigator.of(context)
@@ -74,7 +77,7 @@ class _AppState extends State<App> {
               padding:
                   const EdgeInsets.symmetric(horizontal: kDefaultPadding - 10),
               child: SizedBox(
-                height: size.height * 0.6,
+                height: size.height * 0.66,
                 child: ListView.builder(
                   itemCount: appList.length,
                   itemBuilder: (context, index) {
@@ -121,24 +124,9 @@ class _AppState extends State<App> {
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: const [
-                Text(
-                  "Thank you for your patronage",
-                  style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                      color: Colors.black),
-                )
-              ],
-            ),
-            const SizedBox(
-              height: 10,
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  "Version - 1.0.0 Beta",
+                  "Version - 1.1.7 Beta",
                   style: TextStyle(
                       fontSize: 16, color: Colors.black.withAlpha(100)),
                 )

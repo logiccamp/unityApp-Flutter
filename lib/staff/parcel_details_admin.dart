@@ -7,17 +7,22 @@ import 'package:unitycargo/bll/sendmail.dart';
 import 'package:unitycargo/resources/mail_data.dart';
 import 'package:unitycargo/resources/parcel_data.dart';
 import 'package:unitycargo/resources/user_data.dart';
+import 'package:unitycargo/resources/user_data_parcel.dart';
+import 'package:unitycargo/staff/components/parcel_driver.dart';
 import 'package:unitycargo/staff/components/parcel_history.dart';
+import 'package:unitycargo/staff/components/parcel_status.dart';
 import 'package:unitycargo/staff/components/send_message.dart';
 import 'package:unitycargo/staff/customers_staff_profile.dart';
 import 'package:unitycargo/utils/extensions.dart';
 import 'package:timeago/timeago.dart' as timeago;
+import 'package:url_launcher/url_launcher_string.dart';
 import '../../../bll/parcels_logic.dart';
 import '../../../utils/colors.dart';
 import '../../../utils/utils.dart';
 import '../app/main/mypacel/parcel_status.dart';
 import '../app/main/mypacel/title_with_avatar.dart';
 import 'components/delete_parcel_history.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class AdminParcelDetails extends StatefulWidget {
   AdminParcelDetails({
@@ -38,12 +43,13 @@ class _AdminParcelDetailsState extends State<AdminParcelDetails> {
   var userClass = UsersClass();
   var message = TextEditingController();
   var subject = TextEditingController();
+  String loadingText = "Processing..."; //
   var mailButtonText = "Send Message";
   bool isParcel = false;
   var utils = Utils();
   var Parcel_;
-  User rider = User("", "", "", "");
-
+  UserParcelData rider = UserParcelData("", "", "", "");
+  List<UserParcelData> users_ = [];
   @override
   void dispose() {
     // TODO: implement initState
@@ -57,9 +63,24 @@ class _AdminParcelDetailsState extends State<AdminParcelDetails> {
     // TODO: implement initState
     isLoading = true;
     isParcel = false;
+    loadingText = "Processing...";
     mailButtonText = "Send Message";
     super.initState();
     getParcel();
+    getUsers();
+  }
+
+  void getUsers() async {
+    var response = await userClass.Get("Staff");
+    var us = response["data"];
+    for (var u in us) {
+      var pr = UserParcelData.fromJson(u);
+      if (pr.post.toLowerCase() == "driver") {
+        users_.add(pr);
+      }
+    }
+    setState(() {});
+    print(users_);
   }
 
   getParcel() async {
@@ -76,7 +97,7 @@ class _AdminParcelDetailsState extends State<AdminParcelDetails> {
           isParcel = true;
           Parcel_ = response["data"];
           if (Parcel_["driver_id"] != "") {
-            rider = User.fromJson(Parcel_["rider"]);
+            rider = UserParcelData.fromJson(Parcel_["rider"]);
           }
         });
       }
@@ -92,7 +113,35 @@ class _AdminParcelDetailsState extends State<AdminParcelDetails> {
     final parentWidth =
         size.width - (kDefaultPadding * 2 + (kDefaultPadding / 2 * 2));
 
-    void addDriver() {}
+    void addDriver() {
+      showDialog(
+          context: context,
+          barrierDismissible: true,
+          builder: (BuildContext c) {
+            return ParcelDriver(
+              setLoading: (status) => setState(() => isLoading = status),
+              isLoading: isLoading,
+              riders: users_,
+              t: widget.trackingNumber,
+              f: (driver) async {
+                setState(() {
+                  isLoading = true;
+                });
+                var response = await parcelLogic.updateRider(
+                    driver, widget.trackingNumber);
+                if (response["success"] == true) {
+                  // ScaffoldMessenger.of(c).showSnackBar(const SnackBar(
+                  //   content: Text("Rider added Successfully"),
+                  //   backgroundColor: Colors.green,
+                  // ));
+                }
+
+                getParcel();
+              },
+            );
+          });
+    }
+
     void deleteParcel(id, report) {
       showDialog(
           context: context,
@@ -116,6 +165,7 @@ class _AdminParcelDetailsState extends State<AdminParcelDetails> {
     void addHistory() {
       showDialog(
           context: context,
+          barrierDismissible: true,
           builder: (context) {
             return NewParcelHistory(
               setLoading: (status) => setState(() => isLoading = status),
@@ -140,7 +190,30 @@ class _AdminParcelDetailsState extends State<AdminParcelDetails> {
           });
     }
 
-    void sendMail(email, mailbuttonText) {
+    void updateStatus() {
+      showDialog(
+          context: context,
+          barrierDismissible: true,
+          builder: (context) {
+            return ParcelStatusUpdate(
+              setLoading: (status) => setState(() => isLoading = status),
+              isLoading: isLoading,
+              t: widget.trackingNumber,
+              f: (status) async {
+                setState(() {
+                  isLoading = true;
+                });
+                var response = await parcelLogic.updateStatus(
+                    status, widget.trackingNumber);
+                if (response["success"] == true) {}
+
+                getParcel();
+              },
+            );
+          });
+    }
+
+    void sendMail(email, mailbuttonText, setValues) {
       showDialog(
           context: context,
           builder: (context) {
@@ -198,53 +271,76 @@ class _AdminParcelDetailsState extends State<AdminParcelDetails> {
                                 decoration: const InputDecoration(
                                     hintText: "Type here"),
                               ),
-                              Divider(
+                              const Divider(
                                 height: 10,
                               ),
-                              AppButton(
-                                  text: mailbuttonText,
-                                  size: MediaQuery.of(context).size,
-                                  onpress: isLoading
-                                      ? () {}
-                                      : () async {
-                                          if (isLoading) return;
-                                          setState(() {
-                                            isLoading = true;
-                                            mailbuttonText = "Processing";
-                                          });
-                                          var mail = Mail(subject.text,
-                                              message.text, email);
-                                          bool mailSent =
-                                              await SendMail().Send(mail);
-                                          if (mailSent) {
-                                            subject.text = "";
-                                            message.text = "";
-                                            ScaffoldMessenger.of(context)
-                                                .showSnackBar(
-                                              const SnackBar(
-                                                  content: Text(
-                                                    "Mail Sent Successfully",
-                                                  ),
-                                                  backgroundColor:
-                                                      Colors.green),
-                                            );
-                                          } else {
-                                            ScaffoldMessenger.of(context)
-                                                .showSnackBar(
-                                              const SnackBar(
+                              InkWell(
+                                onTap: isLoading
+                                    ? () {}
+                                    : () async {
+                                        if (isLoading) return;
+                                        if (subject.text == "" ||
+                                            message.text == "") {
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(
+                                            const SnackBar(
                                                 content: Text(
-                                                  "Unable to send mail",
+                                                  "All fields are required",
                                                 ),
-                                                backgroundColor: Colors.red,
-                                              ),
-                                            );
-                                          }
-                                          setState(() {
-                                            isLoading = false;
-                                            mailbuttonText = "Send Message";
-                                          });
-                                          Navigator.of(context).pop();
-                                        })
+                                                backgroundColor: Colors.red),
+                                          );
+                                          return;
+                                        }
+
+                                        Navigator.of(context).pop();
+                                        setValues(
+                                            message.text, email, subject.text);
+                                        return;
+                                      },
+                                child: Container(
+                                  width: size.width * 0.8,
+                                  padding: const EdgeInsets.symmetric(
+                                      vertical: kDefaultPadding / 2 + 2),
+                                  decoration: BoxDecoration(
+                                      color: blueColor,
+                                      borderRadius: BorderRadius.circular(10),
+                                      boxShadow: [
+                                        BoxShadow(
+                                            offset: const Offset(0, 0),
+                                            spreadRadius: 0,
+                                            blurRadius: 10,
+                                            blurStyle: BlurStyle.solid,
+                                            color: blueColor.withOpacity(0.3))
+                                      ]),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Padding(
+                                        padding:
+                                            const EdgeInsets.only(left: 8.0),
+                                        child: Text(
+                                          !isLoading ? "Send" : "processing...",
+                                          style: const TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 18.0),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(
+                                height: 10.0,
+                              ),
+                              InkWell(
+                                onTap: (() {
+                                  Navigator.of(context).pop();
+                                }),
+                                child: const Text(
+                                  "close",
+                                  style: TextStyle(color: Colors.red),
+                                ),
+                              )
                             ],
                           ),
                         ),
@@ -276,8 +372,7 @@ class _AdminParcelDetailsState extends State<AdminParcelDetails> {
                               color: Colors.white,
                               backgroundColor: blueColor,
                             ),
-                            Text("Processing...",
-                                style: TextStyle(fontSize: 16)),
+                            Text(loadingText, style: TextStyle(fontSize: 16)),
                           ]),
                     ),
                   ))
@@ -293,8 +388,9 @@ class _AdminParcelDetailsState extends State<AdminParcelDetails> {
                             children: [
                               InkWell(
                                 onTap: () {
-                                  sendMail(Parcel_["email"].toString(),
-                                      mailButtonText);
+                                  var phone = "tel://" +
+                                      Parcel_["phone_number"].toString();
+                                  launchUrlString(phone);
                                 },
                                 child: Icon(
                                   Icons.call_outlined,
@@ -306,8 +402,42 @@ class _AdminParcelDetailsState extends State<AdminParcelDetails> {
                               ),
                               InkWell(
                                 onTap: () {
+                                  setState(() {
+                                    isLoading = false;
+                                  });
                                   sendMail(Parcel_["email"].toString(),
-                                      mailButtonText);
+                                      mailButtonText,
+                                      (message, email, subject) async {
+                                    var mail = Mail(subject, message, email);
+                                    setState(() {
+                                      isLoading = true;
+                                      loadingText = "Sending...";
+                                    });
+                                    bool mailSent = await SendMail().Send(mail);
+                                    setState(() {
+                                      isLoading = false;
+                                    });
+                                    if (mailSent) {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        const SnackBar(
+                                            content: Text(
+                                              "Mail Sent Successfully",
+                                            ),
+                                            backgroundColor: Colors.green),
+                                      );
+                                    } else {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        const SnackBar(
+                                          content: Text(
+                                            "Unable to send mail",
+                                          ),
+                                          backgroundColor: Colors.red,
+                                        ),
+                                      );
+                                    }
+                                  });
                                 },
                                 child:
                                     Icon(Icons.mail_outline, color: blueColor),
@@ -330,16 +460,33 @@ class _AdminParcelDetailsState extends State<AdminParcelDetails> {
                                       onTap: () {
                                         addDriver();
                                       },
-                                      child: Text("Assign Driver"),
+                                      child: const Text("Assign Rider"),
                                     )
-                                  : InkWell(
-                                      onTap: () => Navigator.of(context).push(
-                                          MaterialPageRoute(
-                                              builder: (context) => UserProfile(
-                                                  id: rider.id,
-                                                  user_type: "Staff"))),
-                                      child: Text(
-                                          "Driver : ${rider.firstname} ${rider.lastname}"),
+                                  : Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.end,
+                                      children: [
+                                        InkWell(
+                                          onTap: () => Navigator.of(context)
+                                              .push(MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      UserProfile(
+                                                          id: rider.id,
+                                                          user_type: "Staff"))),
+                                          child: Text(
+                                              "Driver : ${rider.firstname} ${rider.lastname}"),
+                                        ),
+                                        InkWell(
+                                          onTap: () {
+                                            addDriver();
+                                          },
+                                          child: const Text(
+                                            "change",
+                                            style:
+                                                TextStyle(color: Colors.blue),
+                                          ),
+                                        ),
+                                      ],
                                     ),
                             ],
                           ),
@@ -355,6 +502,18 @@ class _AdminParcelDetailsState extends State<AdminParcelDetails> {
                                   double.parse(Parcel_["progress"].toString()) /
                                       100,
                               hideIcon: true),
+                          Row(
+                            children: [
+                              InkWell(
+                                child: Text(
+                                  "Update status",
+                                  style: TextStyle(color: blueColor),
+                                ),
+                                onTap: updateStatus,
+                              ),
+                            ],
+                          ),
+
                           Image.asset(
                             "assets/images/in_transit.png",
                             height: 300.0,

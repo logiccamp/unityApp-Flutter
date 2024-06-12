@@ -22,6 +22,7 @@ class SendMail {
       "Authorization": "Bearer " + token,
       "token": token,
     });
+    print(response);
     var res = json.decode(response.body);
     if (res == true) {
       isSuccess = true;

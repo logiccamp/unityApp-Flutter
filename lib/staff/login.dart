@@ -105,6 +105,10 @@ class StaffLoginState extends State<StaffLogin> {
                       borderRadius: BorderRadius.circular(20)),
                   child: InkWell(
                     onTap: () async {
+                      if (isLoading) return;
+                      setState(() {
+                        isLoading = true;
+                      });
                       final loginBLL = await login(
                           emailController.text, passwordController.text);
 
@@ -112,14 +116,16 @@ class StaffLoginState extends State<StaffLogin> {
                         if (loginBLL.user_role == "app_user") {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: Text(
+                              content: const Text(
                                   "Invalid permission, please use Customer's Login Page"),
                               backgroundColor: Colors.red.withOpacity(0.6),
                             ),
                           );
+                          setState(() => isLoading = false);
+                          return;
                         }
-
-                        if (loginBLL.user_role == "admin") {
+                        if (loginBLL.user_role == "admin" ||
+                            loginBLL.user_role == "staff") {
                           await appAuthentication.setToken(
                               loginBLL.token, "admin");
                           Navigator.push(
@@ -138,10 +144,11 @@ class StaffLoginState extends State<StaffLogin> {
                       }
                       setState(() => isLoading = false);
                     },
-                    child: const Center(
+                    child: Center(
                       child: Text(
-                        'Login',
-                        style: TextStyle(color: Colors.white, fontSize: 25),
+                        isLoading ? "processing..." : 'Login',
+                        style:
+                            const TextStyle(color: Colors.white, fontSize: 25),
                       ),
                     ),
                   ),

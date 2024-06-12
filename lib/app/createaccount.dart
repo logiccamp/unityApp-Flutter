@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:unitycargo/app/appconatiner.dart';
 import 'package:unitycargo/app/login.dart';
+import 'package:unitycargo/app/reset_password.dart';
 import 'package:unitycargo/bll/signup_logic.dart';
 import 'package:unitycargo/resources/app_authentication.dart';
 
@@ -118,6 +119,9 @@ class _CreateAccountState extends State<CreateAccount> {
                                           recognizer: TapGestureRecognizer()
                                             ..onTap = () {
                                               HapticFeedback.lightImpact();
+                                              appAuthentication.navigatePage(
+                                                  context,
+                                                  const ResetPassword());
                                               // Fluttertoast.showToast(
                                               //   msg:
                                               //   'Forgotten password! button pressed',

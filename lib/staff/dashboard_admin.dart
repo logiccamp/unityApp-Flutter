@@ -26,6 +26,8 @@ class _AdminDashboardState extends State<AdminDashboard> {
   bool isLoading = true;
   var name = "";
   var email = "";
+  var role = "";
+  var post = "";
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
       GlobalKey<RefreshIndicatorState>();
 
@@ -55,6 +57,8 @@ class _AdminDashboardState extends State<AdminDashboard> {
     setState(() {
       name = admin.firstname;
       email = admin.email;
+      post = admin.post.toString().toLowerCase();
+      role = admin.role;
     });
   }
 
@@ -79,6 +83,13 @@ class _AdminDashboardState extends State<AdminDashboard> {
           user_type: "Staff",
         )
       },
+      {
+        "title": "Parcels",
+        "icon": "assets/images/parcel.png",
+        "page": const ParcelListAdmin()
+      },
+    ];
+    List driverDashboard = [
       {
         "title": "Parcels",
         "icon": "assets/images/parcel.png",
@@ -159,13 +170,22 @@ class _AdminDashboardState extends State<AdminDashboard> {
                                     crossAxisSpacing: 10,
                                     mainAxisSpacing: 10,
                                   ),
-                                  itemCount: DashboardList.length,
+                                  itemCount: post == "driver"
+                                      ? driverDashboard.length
+                                      : DashboardList.length,
                                   itemBuilder: (BuildContext context, index) {
-                                    var title = DashboardList[index]["title"]
-                                        .toString();
-                                    var icon =
-                                        DashboardList[index]["icon"].toString();
-                                    var page = DashboardList[index]["page"];
+                                    var title = post == "driver"
+                                        ? driverDashboard[index]["title"]
+                                        : DashboardList[index]["title"]
+                                            .toString();
+                                    var icon = post == "driver"
+                                        ? driverDashboard[index]["icon"]
+                                            .toString()
+                                        : DashboardList[index]["icon"]
+                                            .toString();
+                                    var page = post == "driver"
+                                        ? driverDashboard[index]["page"]
+                                        : DashboardList[index]["page"];
                                     return DashboardCard(
                                       title: title,
                                       icon: icon,

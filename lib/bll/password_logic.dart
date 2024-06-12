@@ -15,7 +15,7 @@ class PasswordLogic {
           "accept": "application/json",
         },
         body: data);
-
+    print(response.body);
     var res = json.decode(response.body);
     return res;
     //return ResponseData(res["status"], res["message"], "", "");
